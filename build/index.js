@@ -38,15 +38,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 var dotenv_1 = require("dotenv");
+var typeorm_1 = require("typeorm");
 dotenv_1.config();
-var database_1 = require("./database");
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, database_1.init()];
+                return [4 /*yield*/, typeorm_1.createConnection()];
             case 1:
                 _a.sent();
                 return [3 /*break*/, 3];

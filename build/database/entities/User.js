@@ -10,29 +10,33 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
-var User = /** @class */ (function () {
-    function User() {
+var Account = /** @class */ (function () {
+    function Account() {
     }
     __decorate([
         typeorm_1.PrimaryGeneratedColumn(),
         __metadata("design:type", Number)
-    ], User.prototype, "id", void 0);
+    ], Account.prototype, "id", void 0);
     __decorate([
         typeorm_1.Column(),
         __metadata("design:type", String)
-    ], User.prototype, "firstName", void 0);
+    ], Account.prototype, "firstName", void 0);
     __decorate([
         typeorm_1.Column(),
         __metadata("design:type", String)
-    ], User.prototype, "lastName", void 0);
+    ], Account.prototype, "lastName", void 0);
+    __decorate([
+        typeorm_1.Column(),
+        __metadata("design:type", String)
+    ], Account.prototype, "discriminator", void 0);
     __decorate([
         typeorm_1.Column(),
         __metadata("design:type", Boolean)
-    ], User.prototype, "isActive", void 0);
-    User = __decorate([
+    ], Account.prototype, "isActive", void 0);
+    Account = __decorate([
         typeorm_1.Entity()
-    ], User);
-    return User;
+    ], Account);
+    return Account;
 }());
-exports.User = User;
+exports.Account = Account;
 //# sourceMappingURL=User.js.map
