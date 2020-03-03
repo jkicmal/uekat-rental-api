@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
-import { Account } from './index';
+import { Account } from './account.entity';
 
 @Entity()
 export class Rental {
