@@ -1,10 +1,13 @@
-import Container, { Service } from 'typedi';
+import Container, { Service, Inject } from 'typedi';
 import { DatabaseError, ServerError } from './errors';
 import { Database } from './database';
 import { Server } from './server';
+import { LoggerToken, Logger } from './common/tokens';
 
 @Service()
 export class App {
+  constructor(@Inject(LoggerToken) private logger: Logger) {}
+
   public async init() {
     /**
      * Connect to the database and save connection in
@@ -13,7 +16,7 @@ export class App {
     const database = Container.get(Database);
     try {
       await database.init();
-      console.log('Connected to the database');
+      this.logger.info('Connected to the database');
     } catch (err) {
       throw new DatabaseError('Database connection failed', err);
     }
@@ -24,7 +27,7 @@ export class App {
     const server = Container.get(Server);
     try {
       await server.init();
-      console.log('Server started');
+      this.logger.info('Server started');
     } catch (err) {
       throw new ServerError("Couldn't start server", err);
     }

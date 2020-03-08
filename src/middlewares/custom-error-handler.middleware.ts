@@ -1,48 +1,53 @@
 import {
   ExpressErrorMiddlewareInterface,
   Middleware,
-  ForbiddenError as RoutingControllersForbiddenError
+  ForbiddenError as RoutingControllersForbiddenError,
+  UnauthorizedError
 } from 'routing-controllers';
-import { Service } from 'typedi';
+import Container, { Service, Inject } from 'typedi';
 import { Request, Response } from 'express';
-import { AppError, ForbiddenError } from '../errors';
-import { ErrorType } from '../enums';
+import { ForbiddenError, UknownServerError } from '../errors';
 import { TokenExpiredError } from 'jsonwebtoken';
+import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
+import { Config } from '../interfaces';
 
 @Service()
 @Middleware({ type: 'after' })
 export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
+  constructor(@Inject(LoggerToken) private logger: Logger, @Inject(ConfigToken) private config: Config) {}
+
   error(error: any, request: Request, response: Response, next: Function) {
-    console.log(`ERROR CONSTRUCTOR: ${error.constructor.name}`);
+    /**
+     * Log error before any modifications
+     */
+    this.logger.error({ error: 'ORIGINAL ERROR OBJECT', ...error });
 
-    console.log(error);
-
+    /**
+     * Catch errors from different libraries
+     */
     if (error instanceof RoutingControllersForbiddenError) error = new ForbiddenError('Access denied');
     if (error instanceof TokenExpiredError) error = new ForbiddenError('Token expired');
-    if (error.isOperational) this.handleOperationalError(response, error);
-    else this.handleUnknownError(response, error);
+    if (error instanceof UnauthorizedError) error = new ForbiddenError('Authorization required');
 
-    next();
-  }
+    /**
+     * Catch any unhadled errors
+     */
+    if (!error.isOperational) error = new UknownServerError('Uknown error', error);
 
-  private handleOperationalError(response: Response, error: AppError) {
+    /**
+     * Handle error response
+     */
+    const errorPayload = {
+      error: error.type,
+      message: error.message,
+      stack: error.stack,
+      originalError: error.originalError
+    };
+
+    this.logger.warn({ ...errorPayload });
+
     return response.status(error.status).json({
-      data: {
-        error: error.type,
-        message: error.message,
-        stack: error.stack,
-        originalError: error.originalError
-      }
-    });
-  }
-
-  private handleUnknownError(response: Response, error: Error) {
-    return response.status(500).json({
-      data: {
-        error: ErrorType.UNKNOWN_SERVER_ERROR,
-        message: 'Uknown error occured',
-        originalError: error
-      }
+      data: errorPayload
     });
   }
 }

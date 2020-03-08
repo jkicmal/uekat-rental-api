@@ -1,19 +1,10 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  Unique,
-  BeforeInsert,
-  ManyToMany,
-  JoinTable
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyToMany, JoinTable } from 'typeorm';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { IsEmail, IsAlpha, Length, IsEnum, IsString, IsMobilePhone, IsNumberString } from 'class-validator';
+import Container from 'typedi';
 import { Rental } from './rental.entity';
 import { AccountType } from '../enums';
 import { Role } from './role.entity';
+import { ConfigToken, JWTToken } from '../common/tokens';
 
 @Entity()
 export class Account {
@@ -21,55 +12,39 @@ export class Account {
   id: number;
 
   @Column()
-  @Length(2, 20)
-  @IsAlpha('pl-PL')
   firstName: string;
 
   @Column()
-  @Length(2, 20)
-  @IsAlpha('pl-PL')
   lastName: string;
 
   @Column()
-  // TODO: Uncomment this after testing
-  // @Unique(['email'])
-  @IsEmail()
   email: string;
 
   @Column()
-  @IsEnum(AccountType)
   type: AccountType;
 
   @Column()
-  @Length(0, 40)
   addressLine1: string;
 
   @Column()
-  @Length(0, 40)
   addressLine2: string;
 
   @Column()
-  @IsString()
   city: string;
 
   @Column()
-  @IsString()
   state: string;
 
   @Column()
-  @IsString()
   postalCode: string;
 
   @Column()
-  @IsString()
   country: string;
 
   @Column()
-  @IsMobilePhone('pl-PL')
   phone: string;
 
   @Column()
-  @IsNumberString()
   bankAccount: string;
 
   @Column()
@@ -80,6 +55,9 @@ export class Account {
 
   @Column({ type: 'varchar', nullable: true })
   token: string | null;
+
+  @Column({ default: true })
+  tokenRefreshRequired: boolean;
 
   /**
    * Relations
@@ -119,8 +97,10 @@ export class Account {
   }
 
   generateToken() {
-    this.token = jwt.sign({ data: 'data' }, 'secret', {
-      expiresIn: '30 seconds'
+    const config = Container.get(ConfigToken);
+    const jwt = Container.get(JWTToken);
+    this.token = jwt.sign({ data: 'data' }, config.jwt.secret, {
+      expiresIn: config.jwt.expiresIn
     });
   }
 }

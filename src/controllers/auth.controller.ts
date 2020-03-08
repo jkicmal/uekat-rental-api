@@ -1,17 +1,21 @@
-import { Post, Body, JsonController, CurrentUser, Authorized, OnUndefined } from 'routing-controllers';
+import { Post, Body, JsonController, CurrentUser, Authorized, OnUndefined, Get } from 'routing-controllers';
 import { validate } from 'class-validator';
 import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Service } from 'typedi';
+import { Service, Inject } from 'typedi';
 import { AccountRepository } from '../repositories';
 import { AccountRegistrationDto, AccountLoginDto } from '../interfaces';
 import { AccountType, StatusCode } from '../enums';
 import { ValidationError, DatabaseError } from '../errors';
-import { Role, Account } from '../entities';
+import { Account } from '../entities';
+import { LoggerToken, Logger } from '../common/tokens';
 
 @Service()
 @JsonController()
 export class AuthController {
-  constructor(@InjectRepository() private accountRepository: AccountRepository) {}
+  constructor(
+    @InjectRepository() private accountRepository: AccountRepository,
+    @Inject(LoggerToken) private logger: Logger
+  ) {}
 
   @Post('/api/v1/register')
   async register(@Body() accountRegistrationDto: AccountRegistrationDto) {
@@ -57,6 +61,7 @@ export class AuthController {
      * Generate and save token
      */
     account.generateToken();
+    account.tokenRefreshRequired = false;
     await this.accountRepository.save(account);
 
     return { data: { token: account.token } };
@@ -67,10 +72,17 @@ export class AuthController {
   @OnUndefined(StatusCode.NO_CONTENT)
   public async logout(@CurrentUser({ required: true }) account: Account) {
     account.token = null;
+    account.tokenRefreshRequired = true;
     try {
       await this.accountRepository.save(account);
     } catch (err) {
       throw new DatabaseError(`Error occured while logging out`, err);
     }
+  }
+
+  @Authorized()
+  @Get('/api/v1/profile')
+  public async getProfile(@CurrentUser({ required: true }) account: Account) {
+    return account;
   }
 }

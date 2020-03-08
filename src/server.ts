@@ -1,14 +1,20 @@
-import { Service, Container } from 'typedi';
+import { Service, Container, Inject } from 'typedi';
 import { createExpressServer, useContainer, Action } from 'routing-controllers';
-import jwt from 'jsonwebtoken';
+import morgan from 'morgan';
+import { InjectRepository } from 'typeorm-typedi-extensions';
 import { CustomErrorHandlerMiddleware } from './middlewares';
 import { Account } from './entities';
-import { InjectRepository } from 'typeorm-typedi-extensions';
 import { AccountRepository } from './repositories';
+import { ConfigToken, JWTToken } from './common/tokens';
+import { Config } from './interfaces';
 
 @Service()
 export class Server {
-  constructor(@InjectRepository(Account) private accountRepository: AccountRepository) {}
+  constructor(
+    @InjectRepository(Account) private accountRepository: AccountRepository,
+    @Inject(ConfigToken) private config: Config,
+    @Inject(JWTToken) private jwt: JWTToken
+  ) {}
 
   public async init() {
     useContainer(Container);
@@ -22,7 +28,9 @@ export class Server {
       middlewares: [CustomErrorHandlerMiddleware]
     });
 
-    await app.listen(3000);
+    app.use(morgan('common'));
+
+    return app.listen(this.config.server.port);
   }
 
   /**
@@ -33,11 +41,13 @@ export class Server {
     if (!token) return false;
 
     // Verify token
-    jwt.verify(token, 'secret');
+    this.jwt.verify(token, this.config.jwt.secret);
 
     if (!token) return false;
-    // const accountRepository = getRepository(Account);
     const account = await this.accountRepository.findOne({ token: token }, { relations: ['roles'] });
+
+    // If account was found but token has to be refreshed
+    if (account && account.tokenRefreshRequired) return false;
 
     // If account was found and there are no roles specified - authorize successfuly
     if (account && !roles.length) return true;
