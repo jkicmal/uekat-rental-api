@@ -3,7 +3,7 @@ import { Service } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Role } from '../entities';
 import { RoleRepository } from '../repositories';
-import { RoleDto } from '../interfaces';
+import { RoleDto } from '../common/interfaces';
 import { DatabaseError } from '../common/errors';
 
 @Service()

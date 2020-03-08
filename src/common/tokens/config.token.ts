@@ -1,5 +1,5 @@
 import Container, { Token } from 'typedi';
-import { Config } from '../../interfaces';
+import { Config } from '../interfaces';
 
 export const ConfigToken = new Token<Config>();
 

@@ -2,7 +2,7 @@ import { Service, Container, Inject } from 'typedi';
 import { createExpressServer, useContainer } from 'routing-controllers';
 import { CustomErrorHandlerMiddleware } from './middlewares';
 import { ConfigToken } from './common/tokens';
-import { Config } from './interfaces';
+import { Config } from './common/interfaces';
 import { RoutingControllerUtils } from './common/utils/routing-controllers.utils';
 import { MorganToken, Morgan } from './common/tokens';
 

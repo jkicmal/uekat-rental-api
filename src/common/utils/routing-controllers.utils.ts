@@ -4,7 +4,7 @@ import { Action } from 'routing-controllers';
 import { AccountRepository } from '../../repositories';
 import { Account } from '../../entities';
 import { ConfigToken, JWTToken } from '../tokens';
-import { Config } from '../../interfaces';
+import { Config } from '../interfaces';
 
 @Service()
 export class RoutingControllerUtils {

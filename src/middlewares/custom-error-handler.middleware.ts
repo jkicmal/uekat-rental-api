@@ -9,7 +9,7 @@ import { Request, Response } from 'express';
 import { ForbiddenError, UknownServerError } from '../common/errors';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
-import { Config } from '../interfaces';
+import { Config } from '../common/interfaces';
 
 @Service()
 @Middleware({ type: 'after' })
