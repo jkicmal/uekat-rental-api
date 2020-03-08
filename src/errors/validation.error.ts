@@ -1,9 +1,9 @@
 import { AppError } from './app.error';
-import { ErrorType, ErrorSource } from '../enums';
+import { ErrorType, StatusCode } from '../enums';
 
 export class ValidationError extends AppError {
   constructor(message: string) {
-    super(message, ErrorType.VALIDATION_ERROR, 400, ErrorSource.INTERNAL);
+    super(message, ErrorType.VALIDATION_ERROR, StatusCode.BAD_REQUEST);
 
     Error.captureStackTrace(this, ValidationError);
   }

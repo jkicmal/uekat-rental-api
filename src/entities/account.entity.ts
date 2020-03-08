@@ -78,8 +78,8 @@ export class Account {
   @Column({ nullable: true })
   avatar: number;
 
-  @Column({ nullable: true })
-  token: string;
+  @Column({ type: 'varchar', nullable: true })
+  token: string | null;
 
   /**
    * Relations

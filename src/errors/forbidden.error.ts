@@ -1,9 +1,9 @@
 import { AppError } from './app.error';
-import { ErrorType, ErrorSource, StatusCode } from '../enums';
+import { ErrorType, StatusCode } from '../enums';
 
 export class ForbiddenError extends AppError {
   constructor(message: string) {
-    super(message, ErrorType.FORBIDDEN, StatusCode.FORBIDDEN, ErrorSource.EXTERNAL);
+    super(message, ErrorType.FORBIDDEN, StatusCode.FORBIDDEN);
 
     Error.captureStackTrace(this, ForbiddenError);
   }

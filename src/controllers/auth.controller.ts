@@ -1,11 +1,11 @@
-import { Post, Body, JsonController } from 'routing-controllers';
-import { AccountRepository } from '../repositories';
-import { Service } from 'typedi';
-import { InjectRepository } from 'typeorm-typedi-extensions';
-import { AccountRegistrationDto, AccountLoginDto } from '../interfaces';
-import { AccountType } from '../enums';
-import { ValidationError, DatabaseError } from '../errors';
+import { Post, Body, JsonController, CurrentUser, Authorized, OnUndefined } from 'routing-controllers';
 import { validate } from 'class-validator';
+import { InjectRepository } from 'typeorm-typedi-extensions';
+import { Service } from 'typedi';
+import { AccountRepository } from '../repositories';
+import { AccountRegistrationDto, AccountLoginDto } from '../interfaces';
+import { AccountType, StatusCode } from '../enums';
+import { ValidationError, DatabaseError } from '../errors';
 import { Role, Account } from '../entities';
 
 @Service()
@@ -60,5 +60,17 @@ export class AuthController {
     await this.accountRepository.save(account);
 
     return { data: { token: account.token } };
+  }
+
+  @Authorized()
+  @Post('/api/v1/logout')
+  @OnUndefined(StatusCode.NO_CONTENT)
+  public async logout(@CurrentUser({ required: true }) account: Account) {
+    account.token = null;
+    try {
+      await this.accountRepository.save(account);
+    } catch (err) {
+      throw new DatabaseError(`Error occured while logging out`, err);
+    }
   }
 }

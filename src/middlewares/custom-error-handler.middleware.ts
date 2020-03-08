@@ -7,6 +7,7 @@ import { Service } from 'typedi';
 import { Request, Response } from 'express';
 import { AppError, ForbiddenError } from '../errors';
 import { ErrorType } from '../enums';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 @Service()
 @Middleware({ type: 'after' })
@@ -17,6 +18,7 @@ export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInter
     console.log(error);
 
     if (error instanceof RoutingControllersForbiddenError) error = new ForbiddenError('Access denied');
+    if (error instanceof TokenExpiredError) error = new ForbiddenError('Token expired');
     if (error.isOperational) this.handleOperationalError(response, error);
     else this.handleUnknownError(response, error);
 
