@@ -1,7 +1,7 @@
 import Container, { Service } from 'typedi';
 import { DatabaseError, ServerError } from './errors';
-import { Server } from './server';
 import { Database } from './database';
+import { Server } from './server';
 
 @Service()
 export class App {
@@ -13,9 +13,9 @@ export class App {
     const database = Container.get(Database);
     try {
       await database.init();
-      console.log('Connected to the database.');
+      console.log('Connected to the database');
     } catch (err) {
-      throw new DatabaseError('Database connection failed.', err);
+      throw new DatabaseError('Database connection failed', err);
     }
 
     /**
@@ -24,9 +24,9 @@ export class App {
     const server = Container.get(Server);
     try {
       await server.init();
-      console.log('Server started.');
+      console.log('Server started');
     } catch (err) {
-      throw new ServerError("Couldn't start server.", err);
+      throw new ServerError("Couldn't start server", err);
     }
   }
 }

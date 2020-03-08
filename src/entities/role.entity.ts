@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, Unique } from 'typeorm';
-import { Account } from './account.entity';
 import { IsAlpha } from 'class-validator';
+import { Account } from './account.entity';
 
 @Entity()
 export class Role {

@@ -10,16 +10,7 @@ import {
 } from 'typeorm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {
-  IsEmail,
-  IsAlpha,
-  Length,
-  IsEnum,
-  IsString,
-  IsMobilePhone,
-  IsNumberString,
-  ValidationError
-} from 'class-validator';
+import { IsEmail, IsAlpha, Length, IsEnum, IsString, IsMobilePhone, IsNumberString } from 'class-validator';
 import { Rental } from './rental.entity';
 import { AccountType } from '../enums';
 import { Role } from './role.entity';
@@ -40,6 +31,7 @@ export class Account {
   lastName: string;
 
   @Column()
+  // TODO: Uncomment this after testing
   // @Unique(['email'])
   @IsEmail()
   email: string;

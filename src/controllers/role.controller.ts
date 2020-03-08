@@ -23,6 +23,7 @@ export class AccountsController {
   }
 
   @Post('/api/v1/roles')
+  @Authorized('Administrator')
   async create(@Body() roleDto: RoleDto) {
     const role = this.roleRepository.create(roleDto);
 

@@ -22,6 +22,9 @@ export class Rental {
   @Column()
   status: string;
 
+  /**
+   * Relations
+   */
   @ManyToOne(
     () => Account,
     account => account.requestedRentals

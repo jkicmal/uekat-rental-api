@@ -27,9 +27,9 @@ export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInter
     return response.status(error.status).json({
       data: {
         error: error.type,
-        message: error.message
-        // stack: error.stack,
-        // originalError: error.originalError
+        message: error.message,
+        stack: error.stack,
+        originalError: error.originalError
       }
     });
   }

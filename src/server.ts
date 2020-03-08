@@ -1,50 +1,45 @@
 import { Service, Container } from 'typedi';
 import { createExpressServer, useContainer, Action } from 'routing-controllers';
+import { InjectRepository } from 'typeorm-typedi-extensions';
+import jwt from 'jsonwebtoken';
 import { CustomErrorHandlerMiddleware } from './middlewares';
 import { AccountRepository } from './repositories';
-import { getRepository } from 'typeorm';
 import { Account } from './entities';
 
 @Service()
 export class Server {
+  // constructor(private authorizationCheckerMiddleware: AuthorizationCheckerMiddleware) {}
+
+  // TODO: Move this dependency to different module
+  constructor(@InjectRepository(Account) private accountRepository: AccountRepository) {}
+
   public async init() {
     useContainer(Container);
+
     const app = createExpressServer({
+      // TODO: Move this function to different module
       authorizationChecker: async (action: Action, roles: string[]) => {
-        // const accountRepository = Container.get(AccountRepository);
-        const accountRepository = getRepository(Account);
-
-        /**
-         * Get token from authorization header
-         */
+        // Check if correct header exists
         const authHeader: string = action.request.headers['authorization'];
-
-        /**
-         * Check if header content is correct
-         */
         if (!authHeader || authHeader.indexOf('Bearer') === -1) return false;
 
-        /**
-         * Check if token exists
-         */
+        // Check if token exists
         const token = authHeader.split(' ')[1];
         if (!token) throw false;
 
-        /**
-         * Get account with roles from
-         */
-        const account = await accountRepository.findOne({ token: token }, { relations: ['roles'] });
+        // Verify token
+        jwt.verify(token, 'secret');
 
-        /**
-         * If no roles specified, let through
-         */
+        // Search for account with that token
+        const account = await this.accountRepository.findOne({ token: token }, { relations: ['roles'] });
+
+        // If account was found and there are no roles specified - authorize successfuly
         if (account && !roles.length) return true;
 
-        /**
-         * If account contains one of the roles, let through
-         */
+        // If account was found and has specified role assigned - authorize successfulyy
         if (account && account.roles.find(role => roles.includes(role.name))) return true;
 
+        // Otherwise deny access
         return false;
       },
       cors: true,
