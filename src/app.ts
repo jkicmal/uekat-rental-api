@@ -1,12 +1,22 @@
 import Container, { Service, Inject } from 'typedi';
-import { DatabaseError, ServerError } from './errors';
+import { DatabaseError, ServerError } from './common/errors';
 import { Database } from './database';
 import { Server } from './server';
 import { LoggerToken, Logger } from './common/tokens';
 
 @Service()
 export class App {
-  constructor(@Inject(LoggerToken) private logger: Logger) {}
+  constructor(
+    /**
+     * FIXME: Error when using constructor injection instead of Container.get()
+     * Error: Cannot get connection "default" from the connection manager. Make sure you have
+     * created such connection. Also make sure you have called useContainer(Container) in your
+     * application before you established a connection and importing any entity.
+     */
+    // private database: Database,
+    // private server: Server,
+    @Inject(LoggerToken) private logger: Logger
+  ) {}
 
   public async init() {
     /**

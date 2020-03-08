@@ -6,7 +6,7 @@ import {
 } from 'routing-controllers';
 import Container, { Service, Inject } from 'typedi';
 import { Request, Response } from 'express';
-import { ForbiddenError, UknownServerError } from '../errors';
+import { ForbiddenError, UknownServerError } from '../common/errors';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
 import { Config } from '../interfaces';
@@ -16,7 +16,7 @@ import { Config } from '../interfaces';
 export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
   constructor(@Inject(LoggerToken) private logger: Logger, @Inject(ConfigToken) private config: Config) {}
 
-  error(error: any, request: Request, response: Response, next: Function) {
+  error(error: any, request: Request, response: Response) {
     /**
      * Log error before any modifications
      */

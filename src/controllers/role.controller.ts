@@ -4,7 +4,7 @@ import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Role } from '../entities';
 import { RoleRepository } from '../repositories';
 import { RoleDto } from '../interfaces';
-import { DatabaseError } from '../errors';
+import { DatabaseError } from '../common/errors';
 
 @Service()
 @JsonController()

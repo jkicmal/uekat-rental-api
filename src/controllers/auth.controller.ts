@@ -4,8 +4,8 @@ import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Service, Inject } from 'typedi';
 import { AccountRepository } from '../repositories';
 import { AccountRegistrationDto, AccountLoginDto } from '../interfaces';
-import { AccountType, StatusCode } from '../enums';
-import { ValidationError, DatabaseError } from '../errors';
+import { AccountType, StatusCode } from '../common/enums';
+import { ValidationError, DatabaseError } from '../common/errors';
 import { Account } from '../entities';
 import { LoggerToken, Logger } from '../common/tokens';
 

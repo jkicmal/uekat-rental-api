@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyTo
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
 import { Rental } from './rental.entity';
-import { AccountType } from '../enums';
+import { AccountType } from '../common/enums';
 import { Role } from './role.entity';
 import { ConfigToken, JWTToken } from '../common/tokens';
 

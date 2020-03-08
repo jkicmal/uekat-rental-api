@@ -3,8 +3,11 @@ import { useContainer, createConnection } from 'typeorm';
 
 @Service()
 export class Database {
-  public async init() {
+  constructor() {
     useContainer(Container);
+  }
+
+  public async init() {
     await createConnection();
   }
 }
