@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import { config } from 'dotenv';
 config();
 
-import Container from 'typedi';
 import { App } from './app';
+import Container from 'typedi';
 
 const app = Container.get(App);
-app.start();
+app.init().catch(error => console.log(error));
