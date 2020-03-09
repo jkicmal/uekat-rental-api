@@ -6,17 +6,7 @@ import { LoggerToken, Logger } from './common/tokens';
 
 @Service()
 export class App {
-  constructor(
-    /**
-     * FIXME: Error when using constructor injection instead of Container.get()
-     * Error: Cannot get connection "default" from the connection manager. Make sure you have
-     * created such connection. Also make sure you have called useContainer(Container) in your
-     * application before you established a connection and importing any entity.
-     */
-    // private database: Database,
-    // private server: Server,
-    @Inject(LoggerToken) private logger: Logger
-  ) {}
+  constructor(@Inject(LoggerToken) private logger: Logger) {}
 
   public async init() {
     /**
