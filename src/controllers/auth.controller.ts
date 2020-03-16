@@ -3,18 +3,20 @@ import { validate } from 'class-validator';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Service, Inject } from 'typedi';
 import { AccountRepository } from '../repositories';
-import { AccountRegistrationDto, AccountLoginDto } from '../common/interfaces';
+import { AccountRegistrationDto, AccountLoginDto, Config } from '../common/interfaces';
 import { AccountType, StatusCode } from '../common/enums';
 import { ValidationError, DatabaseError } from '../common/errors';
 import { Account } from '../entities';
-import { LoggerToken, Logger } from '../common/tokens';
+import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
+import { wait } from '../common/utils/promise.utils';
 
 @Service()
 @JsonController()
 export class AuthController {
   constructor(
     @InjectRepository() private accountRepository: AccountRepository,
-    @Inject(LoggerToken) private logger: Logger
+    @Inject(LoggerToken) private logger: Logger,
+    @Inject(ConfigToken) private config: Config
   ) {}
 
   @Post('/api/v1/register')
@@ -40,6 +42,8 @@ export class AuthController {
   async login(@Body() accountLoginDto: AccountLoginDto) {
     const { password, email } = accountLoginDto;
 
+    await wait(2000);
+
     /**
      * Get account from database
      */
@@ -64,7 +68,7 @@ export class AuthController {
     account.tokenRefreshRequired = false;
     await this.accountRepository.save(account);
 
-    return { data: { token: account.token } };
+    return { data: { token: account.token, expiresIn: this.config.jwt.expiresIn } };
   }
 
   @Authorized()

@@ -1,7 +1,7 @@
 export interface Config {
   jwt: {
     secret: string;
-    expiresIn: string;
+    expiresIn: number;
   };
   server: {
     port: number;

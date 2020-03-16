@@ -1,9 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyToMany, JoinTable } from 'typeorm';
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
-import { Rental } from './rental.entity';
+import { Rental, Role } from '.';
 import { AccountType } from '../common/enums';
-import { Role } from './role.entity';
 import { ConfigToken, JWTToken } from '../common/tokens';
 
 @Entity()
@@ -99,7 +98,7 @@ export class Account {
   generateToken() {
     const config = Container.get(ConfigToken);
     const jwt = Container.get(JWTToken);
-    this.token = jwt.sign({ data: 'data' }, config.jwt.secret, {
+    this.token = jwt.sign({ data: { accountType: this.type } }, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn
     });
   }

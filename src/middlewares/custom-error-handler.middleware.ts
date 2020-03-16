@@ -17,26 +17,18 @@ export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInter
   constructor(@Inject(LoggerToken) private logger: Logger, @Inject(ConfigToken) private config: Config) {}
 
   error(error: any, request: Request, response: Response) {
-    /**
-     * Log error before any modifications
-     */
+    // Log error before any modifications
     this.logger.error({ error: 'ORIGINAL ERROR OBJECT', ...error });
 
-    /**
-     * Catch errors from different libraries
-     */
+    // Catch errors from different libraries
     if (error instanceof RoutingControllersForbiddenError) error = new ForbiddenError('Access denied');
     if (error instanceof TokenExpiredError) error = new ForbiddenError('Token expired');
     if (error instanceof UnauthorizedError) error = new ForbiddenError('Authorization required');
 
-    /**
-     * Catch any unhadled errors
-     */
+    // Catch any unhadled errors
     if (!error.isOperational) error = new UknownServerError('Uknown error', error);
 
-    /**
-     * Handle error response
-     */
+    // Handle error response
     const errorPayload = {
       error: error.type,
       message: error.message,
