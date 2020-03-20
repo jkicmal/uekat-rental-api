@@ -15,15 +15,10 @@ export class RoutingControllerUtils {
   ) {}
 
   /**
-   * Those functions have to be declared as properties, not methods
-   * otherwise when setting checkers in config will use wrong 'this' object
-   */
-
-  /**
    * True - allow access to the resource
    * False - deny access to the resource
    */
-  public authorizationChecker = async (action: Action, roles: string[]) => {
+  public async authorizationChecker(action: Action, roles: string[]) {
     const authHeader = action.request.headers['authorization'];
     const token = this.getTokenFromHeader(authHeader);
 
@@ -46,21 +41,21 @@ export class RoutingControllerUtils {
 
     // Otherwise deny access
     return false;
-  };
+  }
 
   /**
    * Allow usage of CurrentUser decorator in routing controllers
    */
-  public currentUserChecker = async (action: Action) => {
+  public async currentUserChecker(action: Action) {
     const authHeader = action.request.headers['authorization'];
     const token = this.getTokenFromHeader(authHeader);
 
     if (!token) return false;
 
     return await this.accountRepository.findOne({ token: token }, { relations: ['roles'] });
-  };
+  }
 
-  private getTokenFromHeader = (authHeader: string) => {
+  private getTokenFromHeader(authHeader: string) {
     const [bearerString, token] = authHeader.split(' ');
 
     if (!bearerString || bearerString !== 'Bearer') return false;
@@ -68,5 +63,5 @@ export class RoutingControllerUtils {
     if (!token) return false;
 
     return token;
-  };
+  }
 }

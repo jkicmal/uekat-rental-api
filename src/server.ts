@@ -1,5 +1,5 @@
 import { Service, Container, Inject } from 'typedi';
-import { createExpressServer, useContainer } from 'routing-controllers';
+import { createExpressServer, useContainer, Action } from 'routing-controllers';
 import { CustomErrorHandlerMiddleware } from './middlewares';
 import { ConfigToken } from './common/tokens';
 import { Config } from './common/interfaces';
@@ -12,14 +12,18 @@ export class Server {
     @Inject(ConfigToken) private config: Config,
     private routingControllersUtils: RoutingControllerUtils,
     @Inject(MorganToken) private morgan: Morgan
-  ) {
-    useContainer(Container);
-  }
+  ) {}
 
   public async init() {
+    useContainer(Container);
+
     const app = createExpressServer({
-      authorizationChecker: this.routingControllersUtils.authorizationChecker,
-      currentUserChecker: this.routingControllersUtils.currentUserChecker,
+      authorizationChecker: async (action: Action, roles: string[]) => {
+        return this.routingControllersUtils.authorizationChecker(action, roles);
+      },
+      currentUserChecker: async (action: Action) => {
+        return this.routingControllersUtils.currentUserChecker(action);
+      },
       cors: true,
       defaultErrorHandler: false,
       controllers: [__dirname + '/controllers/*.controller.ts'],
