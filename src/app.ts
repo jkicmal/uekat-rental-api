@@ -1,32 +1,33 @@
-import { Service } from 'typedi';
-import { createConnection } from 'typeorm';
-import { DatabaseError, ServerError } from './errors';
+import Container, { Service, Inject } from 'typedi';
+import { DatabaseError, ServerError } from './common/errors';
+import { Database } from './database';
 import { Server } from './server';
+import { LoggerToken, Logger, ConfigToken } from './common/tokens';
+import { Config } from './common/interfaces';
 
 @Service()
 export class App {
-  constructor(private server: Server) {}
+  constructor(@Inject(ConfigToken) private config: Config, @Inject(LoggerToken) private logger: Logger) {}
 
-  public async start() {
+  public async init() {
     /**
      * Connect to the database and save connection in
      * typeorm instance
      */
+    const database = Container.get(Database);
     try {
-      await createConnection();
-      console.log('Connected to the database.');
+      await database.init();
+      this.logger.info('Connected to the database');
     } catch (err) {
-      throw new DatabaseError('Database connection failed.', 504, err);
+      throw new DatabaseError('Database connection failed', err);
     }
 
-    /**
-     * Start server
-     */
+    const server = Container.get(Server);
     try {
-      await this.server.start();
-      console.log('Server started.');
+      await server.init();
+      this.logger.info(`Server started on port ${this.config.server.port}`);
     } catch (err) {
-      throw new ServerError("Couldn't start server.", 504, err);
+      throw new ServerError("Couldn't start server", err);
     }
   }
 }

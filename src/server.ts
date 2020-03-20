@@ -1,16 +1,37 @@
-import { Service } from 'typedi';
-import express, { Express, Request, Response } from 'express';
+import { Service, Container, Inject } from 'typedi';
+import { createExpressServer, useContainer, Action } from 'routing-controllers';
+import { CustomErrorHandlerMiddleware } from './middlewares';
+import { ConfigToken } from './common/tokens';
+import { Config } from './common/interfaces';
+import { RoutingControllerUtils } from './common/utils/routing-controllers.utils';
+import { MorganToken, Morgan } from './common/tokens';
 
 @Service()
 export class Server {
-  private _instance: Express;
-  public start() {
-    this._instance = express();
+  constructor(
+    @Inject(ConfigToken) private config: Config,
+    private routingControllersUtils: RoutingControllerUtils,
+    @Inject(MorganToken) private morgan: Morgan
+  ) {}
 
-    this._instance.get('/', (req: Request, res: Response) => {
-      res.status(200).send('OK');
+  public async init() {
+    useContainer(Container);
+
+    const app = createExpressServer({
+      authorizationChecker: async (action: Action, roles: string[]) => {
+        return this.routingControllersUtils.authorizationChecker(action, roles);
+      },
+      currentUserChecker: async (action: Action) => {
+        return this.routingControllersUtils.currentUserChecker(action);
+      },
+      cors: true,
+      defaultErrorHandler: false,
+      controllers: [__dirname + '/controllers/*.controller.ts'],
+      middlewares: [CustomErrorHandlerMiddleware]
     });
 
-    this._instance.listen(3000);
+    app.use(this.morgan('common'));
+
+    return app.listen(this.config.server.port);
   }
 }

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
-import { Account } from './account.entity';
+import { Account } from '.';
 
 @Entity()
 export class Rental {
@@ -22,6 +22,9 @@ export class Rental {
   @Column()
   status: string;
 
+  /**
+   * Relations
+   */
   @ManyToOne(
     () => Account,
     account => account.requestedRentals

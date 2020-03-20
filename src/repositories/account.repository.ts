@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
-import { AbstractRepository } from 'typeorm';
-import { Account } from '../database/entities';
+import { Repository, EntityRepository } from 'typeorm';
+import { Account } from '../entities';
 
 @Service()
-export class AccountRepository<Account> extends AbstractRepository<Account> {}
+@EntityRepository(Account)
+export class AccountRepository extends Repository<Account> {}

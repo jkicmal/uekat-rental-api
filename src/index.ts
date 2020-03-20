@@ -6,4 +6,4 @@ import Container from 'typedi';
 import { App } from './app';
 
 const app = Container.get(App);
-app.start();
+app.init().catch(error => console.log(error));
