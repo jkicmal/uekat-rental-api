@@ -22,16 +22,16 @@ export class AuthController {
   async register(@Body() accountRegistrationDto: AccountRegistrationDto) {
     const account = this.accountRepository.create(accountRegistrationDto);
 
-    /**
-     * FIXME:
-     * This should return all validation errors
-     */
+    // FIXME:
+    // This should return all validation errors, not only 1
     const validationError = await validateAndGetFirstValidationError(account);
     if (validationError) throw validationError;
 
-    if (accountRegistrationDto.password != accountRegistrationDto.passwordRepeat) {
-      throw new ValidationError(`Passwords don't match`);
-    }
+    const { password, passwordRepeat, email } = accountRegistrationDto;
+    if (password != passwordRepeat) throw new ValidationError(`Passwords don't match`);
+
+    const existingAccountWithGivenEmail = await this.accountRepository.findOne({ email });
+    if (existingAccountWithGivenEmail) throw new ValidationError(`${email} is already taken`);
 
     const savedUser = await this.accountRepository.save(account);
 

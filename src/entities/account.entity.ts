@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  BeforeInsert,
+  ManyToMany,
+  JoinTable,
+  Unique
+} from 'typeorm';
 import {
   Length,
   validate,
@@ -36,8 +45,10 @@ export class Account {
   })
   lastName: string;
 
-  @Column()
-  @IsEmail()
+  @Column({ unique: true })
+  @IsEmail(undefined, {
+    message: (args: ValidationArguments) => `${args.value} is not valid email`
+  })
   email: string;
 
   /**
