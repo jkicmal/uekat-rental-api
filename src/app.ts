@@ -2,21 +2,12 @@ import Container, { Service, Inject } from 'typedi';
 import { DatabaseError, ServerError } from './common/errors';
 import { Database } from './database';
 import { Server } from './server';
-import { LoggerToken, Logger } from './common/tokens';
+import { LoggerToken, Logger, ConfigToken } from './common/tokens';
+import { Config } from './common/interfaces';
 
 @Service()
 export class App {
-  constructor(
-    /**
-     * FIXME: Error when using constructor injection instead of Container.get()
-     * Error: Cannot get connection "default" from the connection manager. Make sure you have
-     * created such connection. Also make sure you have called useContainer(Container) in your
-     * application before you established a connection and importing any entity.
-     */
-    // private database: Database,
-    // private server: Server,
-    @Inject(LoggerToken) private logger: Logger
-  ) {}
+  constructor(@Inject(ConfigToken) private config: Config, @Inject(LoggerToken) private logger: Logger) {}
 
   public async init() {
     /**
@@ -31,13 +22,10 @@ export class App {
       throw new DatabaseError('Database connection failed', err);
     }
 
-    /**
-     * Start server
-     */
     const server = Container.get(Server);
     try {
       await server.init();
-      this.logger.info('Server started');
+      this.logger.info(`Server started on port ${this.config.server.port}`);
     } catch (err) {
       throw new ServerError("Couldn't start server", err);
     }

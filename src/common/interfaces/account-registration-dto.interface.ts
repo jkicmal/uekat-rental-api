@@ -10,6 +10,6 @@ export interface AccountRegistrationDto {
   country: string;
   phone: string;
   bankAccount: string;
-  password1: string;
-  password2: string;
+  password: string;
+  passwordRepeat: string;
 }

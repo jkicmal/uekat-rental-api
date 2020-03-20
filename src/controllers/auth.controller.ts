@@ -1,14 +1,13 @@
 import { Post, Body, JsonController, CurrentUser, Authorized, OnUndefined, Get } from 'routing-controllers';
-import { validate } from 'class-validator';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 import { Service, Inject } from 'typedi';
 import { AccountRepository } from '../repositories';
 import { AccountRegistrationDto, AccountLoginDto, Config } from '../common/interfaces';
-import { AccountType, StatusCode } from '../common/enums';
+import { StatusCode } from '../common/enums';
 import { ValidationError, DatabaseError } from '../common/errors';
 import { Account } from '../entities';
 import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
-import { wait } from '../common/utils/promise.utils';
+import { validateAndGetFirstValidationError } from '../common/helpers';
 
 @Service()
 @JsonController()
@@ -23,15 +22,16 @@ export class AuthController {
   async register(@Body() accountRegistrationDto: AccountRegistrationDto) {
     const account = this.accountRepository.create(accountRegistrationDto);
 
-    account.type = AccountType.CUSTOMER;
+    /**
+     * FIXME:
+     * This should return all validation errors
+     */
+    const validationError = await validateAndGetFirstValidationError(account);
+    if (validationError) throw validationError;
 
-    if (accountRegistrationDto.password1 != accountRegistrationDto.password2) {
+    if (accountRegistrationDto.password != accountRegistrationDto.passwordRepeat) {
       throw new ValidationError(`Passwords don't match`);
     }
-
-    account.password = accountRegistrationDto.password1;
-
-    validate(account);
 
     const savedUser = await this.accountRepository.save(account);
 
@@ -41,8 +41,6 @@ export class AuthController {
   @Post('/api/v1/login')
   async login(@Body() accountLoginDto: AccountLoginDto) {
     const { password, email } = accountLoginDto;
-
-    await wait(2000);
 
     /**
      * Get account from database
@@ -68,7 +66,7 @@ export class AuthController {
     account.tokenRefreshRequired = false;
     await this.accountRepository.save(account);
 
-    return { data: { token: account.token, expiresIn: this.config.jwt.expiresIn } };
+    return { data: { token: account.token, expiresIn: this.config.jwt.expiresIn, accountType: account.type } };
   }
 
   @Authorized()

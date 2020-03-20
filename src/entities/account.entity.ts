@@ -1,4 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Length,
+  validate,
+  ValidationArguments,
+  IsEmail,
+  IsEnum,
+  IsAlpha,
+  MinLength,
+  IsPhoneNumber
+} from 'class-validator';
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
 import { Rental, Role } from '.';
@@ -11,46 +21,67 @@ export class Account {
   id: number;
 
   @Column()
+  @IsAlpha('pl-PL', { message: 'First name should contain only characters' })
+  @Length(2, 30, {
+    message: (args: ValidationArguments) =>
+      `First name length should be between ${args.constraints[0]} and ${args.constraints[1]} characters long`
+  })
   firstName: string;
 
   @Column()
+  @IsAlpha('pl-PL', { message: 'Last name should contain only characters' })
+  @Length(2, 30, {
+    message: (args: ValidationArguments) =>
+      `Last name length should be between ${args.constraints[0]} and ${args.constraints[1]} characters long`
+  })
   lastName: string;
 
   @Column()
+  @IsEmail()
   email: string;
 
-  @Column()
-  type: AccountType;
+  /**
+   * NOTE:
+   * Account is of type CUSTOMER by default
+   * so we assume that every new user is a customer
+   */
+  @Column({ default: AccountType.CUSTOMER })
+  @IsEnum(AccountType)
+  type: AccountType = AccountType.CUSTOMER;
 
-  @Column()
+  @Column({ nullable: true })
   addressLine1: string;
 
-  @Column()
+  @Column({ nullable: true })
   addressLine2: string;
 
   @Column()
+  @Column({ nullable: true })
   city: string;
 
   @Column()
+  @Column({ nullable: true })
   state: string;
 
   @Column()
+  @Column({ nullable: true })
   postalCode: string;
 
   @Column()
+  @Column({ nullable: true })
   country: string;
 
   @Column()
-  phone: string;
+  @IsPhoneNumber('PL', {
+    message: `Given phone number is not from Poland`
+  })
+  phoneNumber: string;
 
   @Column()
-  bankAccount: string;
-
-  @Column()
+  @MinLength(8, {
+    message: (args: ValidationArguments) => `Password should be at least ${args.constraints[0]} characters long`
+  })
   password: string;
-
-  @Column({ nullable: true })
-  avatar: number;
 
   @Column({ type: 'varchar', nullable: true })
   token: string | null;
@@ -86,6 +117,11 @@ export class Account {
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  @BeforeInsert()
+  async validate() {
+    validate(this);
   }
 
   /**
