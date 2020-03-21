@@ -18,8 +18,8 @@ export class Server {
     useContainer(Container);
 
     const app = createExpressServer({
-      authorizationChecker: async (action: Action, roles: string[]) => {
-        return this.routingControllersUtils.authorizationChecker(action, roles);
+      authorizationChecker: async (action: Action, accountTypes: string[]) => {
+        return this.routingControllersUtils.authorizationChecker(action, accountTypes);
       },
       currentUserChecker: async (action: Action) => {
         return this.routingControllersUtils.currentUserChecker(action);

@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
-import { Rental, Role } from '.';
+import { Rental } from '.';
 import { AccountType } from '../common/enums';
 import { ConfigToken, JWTToken } from '../common/tokens';
 
@@ -105,13 +105,6 @@ export class Account {
     rental => rental.acceptedBy
   )
   acceptedRentals: Rental[];
-
-  @ManyToMany(
-    () => Role,
-    role => role.accounts
-  )
-  @JoinTable()
-  roles: Role[];
 
   /**
    * Listeners

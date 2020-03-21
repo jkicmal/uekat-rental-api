@@ -1,85 +1,30 @@
 import { Post, Body, JsonController, CurrentUser, Authorized, OnUndefined, Get } from 'routing-controllers';
-import { InjectRepository } from 'typeorm-typedi-extensions';
-import { Service, Inject } from 'typedi';
-import { AccountRepository } from '../repositories';
-import { AccountRegistrationDto, AccountLoginDto, Config } from '../common/interfaces';
+import { Service } from 'typedi';
+import { AccountRegisterFormData, AccountLoginFormData } from '../common/interfaces';
 import { StatusCode } from '../common/enums';
-import { ValidationError, DatabaseError } from '../common/errors';
 import { Account } from '../entities';
-import { LoggerToken, Logger, ConfigToken } from '../common/tokens';
-import { validateAndGetFirstValidationError } from '../common/helpers';
+import { AuthService } from '../services';
 
 @Service()
 @JsonController()
 export class AuthController {
-  constructor(
-    @InjectRepository() private accountRepository: AccountRepository,
-    @Inject(LoggerToken) private logger: Logger,
-    @Inject(ConfigToken) private config: Config
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('/api/v1/register')
-  async register(@Body() accountRegistrationDto: AccountRegistrationDto) {
-    const account = this.accountRepository.create(accountRegistrationDto);
-
-    // FIXME:
-    // This should return all validation errors, not only 1
-    const validationError = await validateAndGetFirstValidationError(account);
-    if (validationError) throw validationError;
-
-    const { password, passwordRepeat, email } = accountRegistrationDto;
-    if (password != passwordRepeat) throw new ValidationError(`Passwords don't match`);
-
-    const existingAccountWithGivenEmail = await this.accountRepository.findOne({ email });
-    if (existingAccountWithGivenEmail) throw new ValidationError(`${email} is already taken`);
-
-    const savedUser = await this.accountRepository.save(account);
-
-    return savedUser;
+  async register(@Body() accountRegisterFormData: AccountRegisterFormData) {
+    return this.authService.register(accountRegisterFormData);
   }
 
   @Post('/api/v1/login')
-  async login(@Body() accountLoginDto: AccountLoginDto) {
-    const { password, email } = accountLoginDto;
-
-    /**
-     * Get account from database
-     */
-    let account: Account | undefined;
-    try {
-      account = await this.accountRepository.findOne({ email: email }, { relations: ['roles'] });
-    } catch (err) {
-      throw new DatabaseError(`Error occured while searching for account`, err);
-    }
-    if (!account) throw new ValidationError(`Email or password invalid`);
-
-    /**
-     * Validate password
-     */
-    const passwordCheck = await account.validatePassword(password);
-    if (!passwordCheck) throw new ValidationError(`Email or password invalid`);
-
-    /**
-     * Generate and save token
-     */
-    account.generateToken();
-    account.tokenRefreshRequired = false;
-    await this.accountRepository.save(account);
-
-    return { data: { token: account.token, expiresIn: this.config.jwt.expiresIn, accountType: account.type } };
+  async login(@Body() accountLoginFormData: AccountLoginFormData) {
+    return this.authService.login(accountLoginFormData);
   }
 
   @Authorized()
   @Post('/api/v1/logout')
   @OnUndefined(StatusCode.NO_CONTENT)
   public async logout(@CurrentUser({ required: true }) account: Account) {
-    account.token = null;
-    account.tokenRefreshRequired = true;
-    try {
-      await this.accountRepository.save(account);
-    } catch (err) {
-      throw new DatabaseError(`Error occured while logging out`, err);
-    }
+    return this.authService.logout(account);
   }
 
   @Authorized()
