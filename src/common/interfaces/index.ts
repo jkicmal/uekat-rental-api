@@ -6,5 +6,3 @@ export * from './product-form-data.interface';
 
 // Other
 export * from './config.interface';
-export * from './resource-query-path-params.interface';
-export * from './resource-query-params.interface';
