@@ -31,8 +31,8 @@ class CategoryService {
   public async update(id: number, categoryFormData: CategoryFormData) {
     const categoryToUpdate = await this.categoryRepository.findOne(id);
     if (!categoryToUpdate) throw new NotFoundError('Category not found');
-    const updatedCategory = await this.categoryRepository.save({ id: id, ...categoryFormData });
-    return { data: updatedCategory };
+    const updatedFields = await this.categoryRepository.save({ id: id, ...categoryFormData });
+    return { data: { ...categoryToUpdate, ...updatedFields } };
   }
 
   public async delete(id: number) {

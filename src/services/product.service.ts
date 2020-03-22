@@ -31,8 +31,8 @@ class ProductService {
   public async update(id: number, productFormData: ProductFormData) {
     const productToUpdate = await this.productRepository.findOne({ id });
     if (!productToUpdate) throw new NotFoundError('Product not found');
-    const updatedProduct = await this.productRepository.save({ id, ...productFormData });
-    return { data: updatedProduct };
+    const updatedFields = await this.productRepository.save({ id, ...productFormData });
+    return { data: { ...productToUpdate, ...updatedFields } };
   }
 
   public async delete(id: number) {
