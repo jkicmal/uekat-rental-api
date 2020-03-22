@@ -4,18 +4,20 @@ import { InjectRepository } from 'typeorm-typedi-extensions';
 import { ProductRepository } from '../repositories';
 import { ProductFormData } from '../common/interfaces';
 import { NotFoundError } from '../common/errors';
+import { Product } from '../entities';
+import { ResourceQueryParams } from '../common/helpers';
 
 @Service()
 class ProductService {
   constructor(@InjectRepository() private productRepository: ProductRepository) {}
 
-  public async getAll() {
-    const products = await this.productRepository.find({ relations: ['category'] });
+  public async getAll(resourceQueryParams: ResourceQueryParams<Product>) {
+    const products = await this.productRepository.find(resourceQueryParams);
     return { data: products };
   }
 
-  public async getOne(id: number) {
-    const product = await this.productRepository.findOne({ id }, { relations: ['category'] });
+  public async getOne(id: number, resourceQueryParams: ResourceQueryParams<Product>) {
+    const product = await this.productRepository.findOne({ id }, resourceQueryParams);
     if (!product) throw new NotFoundError('Product not found');
     return { data: product };
   }

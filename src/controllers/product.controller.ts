@@ -4,22 +4,7 @@ import { Service } from 'typedi';
 import { ProductFormData } from '../common/interfaces';
 import { ProductService } from '../services';
 import { Product } from '../entities';
-
-class ResourceQueryParams {
-  skip?: string;
-  take?: string;
-  relations?: string;
-  order?: string;
-}
-
-class ResourceQueryParamsBuilder<T> {
-  public skip: number;
-  public take: number;
-  public relations: Array<string>;
-  public order: { [key in keyof T]: number };
-
-  constructor(public resourceQueryParams: ResourceQueryParams) {}
-}
+import { ResourceQueryPathParams, ResourceQueryParamsBuilder } from '../common/helpers';
 
 @Service()
 @JsonController()
@@ -27,17 +12,25 @@ export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Get('/api/v1/products')
-  public async getAll(@QueryParams() resourceQueryParams: ResourceQueryParams) {
-    // TODO: Does it makes sense?
-    const resourceQueryParamsBuilder = new ResourceQueryParamsBuilder<Product>(resourceQueryParams);
-    resourceQueryParamsBuilder.order.category = 1;
+  public async getAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Product>(resourceQueryPathParams)
+      .applyOrder()
+      .applyRelations(['category'])
+      .applyPagination().resourceQueryParams;
 
-    return this.productService.getAll();
+    return this.productService.getAll(resourceQueryParams);
   }
 
   @Get('/api/v1/products/:id')
-  public async getOne(@Param('id') id: number) {
-    return this.productService.getOne(id);
+  public async getOne(
+    @Param('id') id: number,
+    @QueryParams() resourceQueryPathParams: ResourceQueryPathParams
+  ) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Product>(
+      resourceQueryPathParams
+    ).applyRelations(['category']).resourceQueryParams;
+
+    return this.productService.getOne(id, resourceQueryParams);
   }
 
   @Post('/api/v1/products')

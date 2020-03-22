@@ -4,18 +4,20 @@ import { InjectRepository } from 'typeorm-typedi-extensions';
 import { CategoryRepository } from '../repositories';
 import { CategoryFormData } from '../common/interfaces';
 import { NotFoundError } from '../common/errors/';
+import { Category } from '../entities';
+import { ResourceQueryParams } from '../common/helpers';
 
 @Service()
 class CategoryService {
   constructor(@InjectRepository() private categoryRepository: CategoryRepository) {}
 
-  public async getAll() {
-    const categories = await this.categoryRepository.find();
+  public async getAll(resourceQueryParams: ResourceQueryParams<Category>) {
+    const categories = await this.categoryRepository.find(resourceQueryParams);
     return { data: categories };
   }
 
-  public async getOne(id: number) {
-    const category = await this.categoryRepository.findOne(id);
+  public async getOne(id: number, resourceQueryParams: ResourceQueryParams<Category>) {
+    const category = await this.categoryRepository.findOne(id, resourceQueryParams);
     if (!category) throw new NotFoundError('Category not found');
     return { data: category };
   }
