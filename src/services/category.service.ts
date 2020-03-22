@@ -39,7 +39,7 @@ class CategoryService {
     const categoryToDelete = await this.categoryRepository.findOne(id);
     if (!categoryToDelete) throw new NotFoundError('Category not found');
     const deletedCategory = await this.categoryRepository.remove(categoryToDelete);
-    return { data: { id, ...deletedCategory } };
+    return { data: { ...deletedCategory, id } };
   }
 }
 

@@ -39,7 +39,7 @@ class ProductService {
     const productToDelete = await this.productRepository.findOne({ id });
     if (!productToDelete) throw new NotFoundError('Product not found');
     const deletedProduct = await this.productRepository.remove(productToDelete);
-    return { data: { id, ...deletedProduct } };
+    return { data: { ...deletedProduct, id } };
   }
 }
 
