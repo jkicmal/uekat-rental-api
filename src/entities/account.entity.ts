@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
-import { Rental } from '.';
+import { Rental, Item } from '.';
 import { AccountType } from '../common/enums';
 import { ConfigToken, JWTToken } from '../common/tokens';
 
@@ -81,7 +81,8 @@ export class Account {
 
   @Column()
   @MinLength(8, {
-    message: (args: ValidationArguments) => `Password should be at least ${args.constraints[0]} characters long`
+    message: (args: ValidationArguments) =>
+      `Password should be at least ${args.constraints[0]} characters long`
   })
   password: string;
 
@@ -105,6 +106,12 @@ export class Account {
     rental => rental.acceptedBy
   )
   acceptedRentals: Rental[];
+
+  @OneToMany(
+    () => Item,
+    item => item.owner
+  )
+  ownedItems: Item[];
 
   /**
    * Listeners
