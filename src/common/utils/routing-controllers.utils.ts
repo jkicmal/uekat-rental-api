@@ -20,11 +20,11 @@ export class RoutingControllerUtils {
    */
   public async authorizationChecker(action: Action, accountTypes: string[]) {
     const authHeader = action.request.headers['authorization'];
+
     if (!authHeader) return false;
 
     const token = this.getTokenFromHeader(authHeader);
 
-    console.log('test');
     if (!token) return false;
 
     // Verify token

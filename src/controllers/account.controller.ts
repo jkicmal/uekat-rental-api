@@ -8,7 +8,7 @@ import { AccountType } from '../common/enums';
 export class AccountsController {
   constructor(@InjectRepository(Account) private accountRepository: AccountRepository) {}
 
-  @Get('/api/v1/accounts')
+  @Get('/api/v1/employee/accounts')
   @Authorized(AccountType.EMPLOYEE)
   async getAll() {
     return this.accountRepository.find();
