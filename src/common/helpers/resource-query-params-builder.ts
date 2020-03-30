@@ -5,6 +5,7 @@ export interface ResourceQueryPathParams {
   take?: string;
   relations?: string;
   order?: string;
+  where?: string;
 }
 
 export class ResourceQueryParams<Entity = any> implements FindManyOptions<Entity> {
@@ -13,6 +14,9 @@ export class ResourceQueryParams<Entity = any> implements FindManyOptions<Entity
   public relations?: Array<string>;
   public order?: {
     [P in keyof Entity]?: 'ASC' | 'DESC' | 1 | -1;
+  };
+  public where?: {
+    [P in keyof Entity]?: string;
   };
 }
 
@@ -49,6 +53,14 @@ export class ResourceQueryParamsBuilder<T> {
     const { order } = this.resourceQueryPathParams;
     if (order) {
       this.resourceQueryParams.order = JSON.parse(order);
+    }
+    return this;
+  }
+
+  public applyWhere() {
+    const { where } = this.resourceQueryPathParams;
+    if (where) {
+      this.resourceQueryParams.where = JSON.parse(where);
     }
     return this;
   }

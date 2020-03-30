@@ -28,6 +28,7 @@ export class ItemController {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Item>(resourceQueryPathParams)
       .applyOrder()
       .applyRelations(['product', 'owner'])
+      .applyWhere()
       .applyPagination().resourceQueryParams;
 
     return this.itemService.getAll(resourceQueryParams);
