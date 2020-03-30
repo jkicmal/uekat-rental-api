@@ -13,10 +13,10 @@ export class Product {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ type: 'float' })
   price: number;
 
-  @Column()
+  @Column({ type: 'float' })
   deposit: number;
 
   @Column({ type: 'boolean', default: true })

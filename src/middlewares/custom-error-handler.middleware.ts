@@ -30,7 +30,7 @@ export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInter
 
     // Handle error response
     const errorPayload = {
-      error: error.type,
+      type: error.type,
       message: error.message,
       stack: error.stack,
       originalError: error.originalError
