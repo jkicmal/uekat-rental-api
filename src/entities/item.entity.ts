@@ -21,7 +21,7 @@ export class Item {
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: false })
   productId: number;
 
   @ManyToOne(
