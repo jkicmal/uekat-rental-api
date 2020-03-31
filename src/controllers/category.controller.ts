@@ -30,7 +30,7 @@ export class CategoryController {
   public async getAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Category>(resourceQueryPathParams)
       .applyOrder()
-      .applyRelations(['products']).resourceQueryParams;
+      .applyRelations(['products', 'products.category']).resourceQueryParams;
 
     return this.categoryService.getAll(resourceQueryParams);
   }
