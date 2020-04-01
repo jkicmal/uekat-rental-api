@@ -1,6 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Category } from './category.entity';
-import { Item } from './item.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  ManyToMany
+} from 'typeorm';
+
+import { Item, Rental, Category } from '.';
 
 @Entity()
 export class Product {
@@ -41,4 +49,7 @@ export class Product {
     item => item.product
   )
   items: Item[];
+
+  @ManyToMany(() => Rental)
+  rentals: Rental[];
 }

@@ -1,11 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Account } from '.';
-import { Product } from './product.entity';
+import { Account, Product } from '.';
 
 @Entity()
 export class Item {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'boolean', default: true })
+  available: boolean;
 
   /**
    * Relations

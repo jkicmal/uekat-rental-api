@@ -1,6 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+  JoinTable
+} from 'typeorm';
 
-import { Account } from '.';
+import { Account, Product, Item } from '.';
+import { RentalStatus } from '../common/enums';
 
 @Entity()
 export class Rental {
@@ -8,19 +17,16 @@ export class Rental {
   id: number;
 
   @Column()
-  startTime: Date;
+  startDate: Date;
 
   @Column()
-  endTime: Date;
+  endDate: Date;
 
   @Column()
-  requestedTime: Date;
+  pickupTime: Date;
 
-  @Column()
-  cancelledTime: Date;
-
-  @Column()
-  status: string;
+  @Column({ enum: RentalStatus, default: RentalStatus.NEW })
+  status: RentalStatus;
 
   /**
    * Relations
@@ -38,4 +44,12 @@ export class Rental {
   )
   @JoinColumn({ name: 'acceptedBy' })
   acceptedBy: Account;
+
+  @ManyToMany(() => Product)
+  @JoinTable()
+  requestedProducts: Product[];
+
+  @ManyToMany(() => Item)
+  @JoinTable()
+  items: Item[];
 }
