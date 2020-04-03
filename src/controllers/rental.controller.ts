@@ -1,4 +1,4 @@
-import { JsonController, Post, Body, Authorized, CurrentUser } from 'routing-controllers';
+import { JsonController, Post, Body, Authorized, CurrentUser, Get } from 'routing-controllers';
 import { Service } from 'typedi';
 
 import { RentalFormData } from '../common/interfaces';
@@ -13,10 +13,17 @@ export class ProductController {
 
   @Authorized(AccountType.CUSTOMER)
   @Post('/api/v1/customer/rentals')
-  public async create(
+  public async customerCreate(
     @CurrentUser({ required: true }) customer: Account,
     @Body() rentalFormData: RentalFormData
   ) {
     return this.rentalService.create(customer, rentalFormData);
+  }
+
+  @Authorized(AccountType.CUSTOMER)
+  @Get('/api/v1/customer/rentals')
+  public async customerGetAll(@CurrentUser({ required: true }) customer: Account) {
+    const rentals = this.rentalService.getCustomerRentals(customer);
+    return { data: { rentals } };
   }
 }

@@ -47,6 +47,11 @@ class RentalService {
 
     return { data: { ...createdRental } };
   }
+
+  public async getCustomerRentals(customer: Account) {
+    const rentals = await this.rentalRepository.find({ where: { requestedBy: customer.id } });
+    return { rentals };
+  }
 }
 
 export default RentalService;
