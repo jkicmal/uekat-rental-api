@@ -5,7 +5,8 @@ import { RentalFormData } from '../common/interfaces';
 import { RentalRepository, ProductRepository, ItemRepository } from '../repositories';
 import { Rental, Account } from '../entities';
 import { MomentToken, MomentInstance } from '../common/tokens';
-import { NotFoundError, ValidationError } from '../common/errors';
+import { NotFoundError } from '../common/errors';
+import { sum } from '../common/utils/math.utils';
 
 @Service()
 class RentalService {
@@ -39,6 +40,8 @@ class RentalService {
     rental.requestedBy = customer;
     rental.requestedProducts = productsToRent;
     rental.items = itemsForRent;
+    rental.priceTotal = sum(productsToRent.map(product => product.price));
+    rental.depositTotal = sum(productsToRent.map(product => product.deposit));
     rental.endDate = this.moment(rentalFormData.endDate).toDate();
     rental.startDate = this.moment(rentalFormData.startDate).toDate();
     rental.pickupTime = this.moment(rentalFormData.pickupTime).toDate();

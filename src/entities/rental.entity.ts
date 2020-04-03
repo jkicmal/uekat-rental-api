@@ -28,6 +28,12 @@ export class Rental {
   @Column({ enum: RentalStatus, default: RentalStatus.NEW })
   status: RentalStatus;
 
+  @Column({ type: 'float' })
+  depositTotal: number;
+
+  @Column({ type: 'float' })
+  priceTotal: number;
+
   /**
    * Relations
    */
