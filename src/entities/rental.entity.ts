@@ -5,7 +5,9 @@ import {
   ManyToOne,
   JoinColumn,
   ManyToMany,
-  JoinTable
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 import { Account, Product, Item } from '.';
@@ -33,6 +35,12 @@ export class Rental {
 
   @Column({ type: 'float' })
   priceTotal: number;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   /**
    * Relations

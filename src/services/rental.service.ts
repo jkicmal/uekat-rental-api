@@ -52,8 +52,7 @@ class RentalService {
   }
 
   public async getCustomerRentals(customer: Account) {
-    const rentals = await this.rentalRepository.find({ where: { requestedBy: customer.id } });
-    return { rentals };
+    return await this.rentalRepository.find({ where: { requestedBy: customer.id } });
   }
 }
 

@@ -24,6 +24,6 @@ export class ProductController {
   @Get('/api/v1/customer/rentals')
   public async customerGetAll(@CurrentUser({ required: true }) customer: Account) {
     const rentals = await this.rentalService.getCustomerRentals(customer);
-    return { data: { rentals } };
+    return { data: rentals };
   }
 }
