@@ -23,7 +23,7 @@ export class ProductController {
   @Authorized(AccountType.CUSTOMER)
   @Get('/api/v1/customer/rentals')
   public async customerGetAll(@CurrentUser({ required: true }) customer: Account) {
-    const rentals = this.rentalService.getCustomerRentals(customer);
+    const rentals = await this.rentalService.getCustomerRentals(customer);
     return { data: { rentals } };
   }
 }
