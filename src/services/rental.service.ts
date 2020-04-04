@@ -7,6 +7,7 @@ import { Rental, Account } from '../entities';
 import { MomentToken, MomentInstance } from '../common/tokens';
 import { NotFoundError } from '../common/errors';
 import { sum } from '../common/utils/math.utils';
+import { ResourceQueryParams } from '../common/helpers';
 
 @Service()
 class RentalService {
@@ -58,8 +59,12 @@ class RentalService {
     });
   }
 
-  public async getAllRentals() {
-    return await this.rentalRepository.find({ relations: ['requestedBy'], order: { createdAt: -1 } });
+  public async getAllRentals(resouceQueryParams: ResourceQueryParams) {
+    return await this.rentalRepository.find(resouceQueryParams);
+  }
+
+  public async getOneRental(id: number, resouceQueryParams: ResourceQueryParams) {
+    return await this.rentalRepository.findOne(id, resouceQueryParams);
   }
 }
 
