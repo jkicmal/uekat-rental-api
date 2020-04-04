@@ -26,4 +26,11 @@ export class ProductController {
     const rentals = await this.rentalService.getCustomerRentals(customer);
     return { data: rentals };
   }
+
+  @Authorized(AccountType.EMPLOYEE)
+  @Get('/api/v1/employee/rentals')
+  public async employeeGetAll() {
+    const rentals = await this.rentalService.getAllRentals();
+    return { data: rentals };
+  }
 }

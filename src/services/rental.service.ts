@@ -52,7 +52,14 @@ class RentalService {
   }
 
   public async getCustomerRentals(customer: Account) {
-    return await this.rentalRepository.find({ where: { requestedBy: customer.id } });
+    return await this.rentalRepository.find({
+      where: { requestedBy: customer.id },
+      order: { createdAt: -1 }
+    });
+  }
+
+  public async getAllRentals() {
+    return await this.rentalRepository.find({ relations: ['requestedBy'], order: { createdAt: -1 } });
   }
 }
 
