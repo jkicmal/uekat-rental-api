@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, getConnection } from 'typeorm';
 import {
   Length,
   validate,
@@ -139,5 +139,12 @@ export class Account {
     this.token = jwt.sign({ data: { accountType: this.type } }, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn
     });
+  }
+
+  async hasRented(rental: Rental) {
+    const rented = await getConnection()
+      .getRepository(Rental)
+      .findOne(rental.id, { relations: ['requestedBy'] });
+    return rented && rented.requestedBy.id === this.id;
   }
 }

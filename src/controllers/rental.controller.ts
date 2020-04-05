@@ -27,7 +27,8 @@ export class ProductController {
     @CurrentUser({ required: true }) customer: Account,
     @Body() rentalFormData: RentalFormData
   ) {
-    return this.rentalService.create(customer, rentalFormData);
+    const rental = await this.rentalService.createCustomerRental(customer, rentalFormData);
+    return { data: rental };
   }
 
   @Authorized(AccountType.CUSTOMER)
@@ -37,12 +38,26 @@ export class ProductController {
     return { data: rentals };
   }
 
+  @Authorized(AccountType.CUSTOMER)
+  @Get('/api/v1/customer/rentals/:id')
+  public async customerGetOne(
+    @Param('id') id: number,
+    @CurrentUser({ required: true }) customer: Account,
+    @QueryParams() resourceQueryPathParams: ResourceQueryPathParams
+  ) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(
+      resourceQueryPathParams
+    ).applyRelations(['products', 'products.category']).resourceQueryParams;
+    const rentals = await this.rentalService.getCustomerRental(customer, id, resourceQueryParams);
+    return { data: rentals };
+  }
+
   @Authorized(AccountType.EMPLOYEE)
   @Get('/api/v1/employee/rentals')
   public async employeeGetAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(
       resourceQueryPathParams
-    ).applyRelations(['items']).resourceQueryParams;
+    ).applyRelations(['requestedBy']).resourceQueryParams;
     const rentals = await this.rentalService.getAllRentals(resourceQueryParams);
     return { data: rentals };
   }
@@ -55,7 +70,7 @@ export class ProductController {
   ) {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(
       resourceQueryPathParams
-    ).applyRelations(['items']).resourceQueryParams;
+    ).applyRelations(['items', 'requestedBy', 'items.product', 'items.product.category']).resourceQueryParams;
     const rentals = await this.rentalService.getOneRental(id, resourceQueryParams);
     return { data: rentals };
   }

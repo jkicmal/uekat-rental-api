@@ -61,7 +61,7 @@ export class Rental {
 
   @ManyToMany(() => Product)
   @JoinTable()
-  requestedProducts: Product[];
+  products: Product[];
 
   @ManyToMany(() => Item)
   @JoinTable()

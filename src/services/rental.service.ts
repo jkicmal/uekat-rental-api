@@ -5,7 +5,7 @@ import { RentalFormData } from '../common/interfaces';
 import { RentalRepository, ProductRepository, ItemRepository } from '../repositories';
 import { Rental, Account } from '../entities';
 import { MomentToken, MomentInstance } from '../common/tokens';
-import { NotFoundError } from '../common/errors';
+import { NotFoundError, ForbiddenError } from '../common/errors';
 import { sum } from '../common/utils/math.utils';
 import { ResourceQueryParams } from '../common/helpers';
 
@@ -18,28 +18,19 @@ class RentalService {
     @Inject(MomentToken) private moment: MomentInstance
   ) {}
 
-  public async create(customer: Account, rentalFormData: RentalFormData) {
-    const productsToRent = await this.productRepository
-      .createQueryBuilder('product')
-      .innerJoinAndSelect('product.items', 'item')
-      .innerJoinAndSelect('product.category', 'category')
-      .whereInIds(rentalFormData.productsIds)
-      .andWhere('item.available = true')
-      .getMany();
+  public async createCustomerRental(customer: Account, rentalFormData: RentalFormData) {
+    const productsToRent = await this.productRepository.findProductsAvailableForRental(
+      rentalFormData.productsIds
+    );
 
     if (!productsToRent.length) throw new NotFoundError('One of requested products is unavailable');
 
-    const itemsForRent = productsToRent.map(product => {
-      const item = product.items[0];
-      item.available = false;
-      return item;
-    });
-
-    await this.itemRepository.save(itemsForRent);
+    const itemsForRent = productsToRent.map(product => product.items[0]);
+    await this.itemRepository.setItemsAvailability(itemsForRent, false);
 
     const rental = new Rental();
     rental.requestedBy = customer;
-    rental.requestedProducts = productsToRent;
+    rental.products = productsToRent;
     rental.items = itemsForRent;
     rental.priceTotal = sum(productsToRent.map(product => product.price));
     rental.depositTotal = sum(productsToRent.map(product => product.deposit));
@@ -49,7 +40,7 @@ class RentalService {
 
     const createdRental = await this.rentalRepository.save(rental);
 
-    return { data: { ...createdRental } };
+    return createdRental;
   }
 
   public async getCustomerRentals(customer: Account) {
@@ -59,12 +50,23 @@ class RentalService {
     });
   }
 
-  public async getAllRentals(resouceQueryParams: ResourceQueryParams) {
-    return await this.rentalRepository.find(resouceQueryParams);
+  public async getAllRentals(resourceQueryParams: ResourceQueryParams) {
+    return await this.rentalRepository.find(resourceQueryParams);
   }
 
-  public async getOneRental(id: number, resouceQueryParams: ResourceQueryParams) {
-    return await this.rentalRepository.findOne(id, resouceQueryParams);
+  public async getOneRental(id: number, resourceQueryParams: ResourceQueryParams) {
+    return await this.rentalRepository.findOne(id, resourceQueryParams);
+  }
+
+  public async getCustomerRental(customer: Account, id: number, resourceQueryParams: ResourceQueryParams) {
+    const rental = await this.rentalRepository.findOne(id, resourceQueryParams);
+
+    if (!rental) throw new NotFoundError('Rental not found');
+
+    const wasRentedByCustomer = await customer.hasRented(rental);
+    if (!wasRentedByCustomer) throw new ForbiddenError('Rental was not requested by that customer');
+
+    return rental;
   }
 }
 
