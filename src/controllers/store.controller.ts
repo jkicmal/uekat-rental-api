@@ -8,7 +8,7 @@ export class StoreController {
   constructor(private storeService: StoreService) {}
   @Get('/api/v1/store')
   async store() {
-    const categoriesWithProducts = await this.storeService.getCategoriesWithProducts();
-    return { data: categoriesWithProducts };
+    const data = await this.storeService.getStoreData();
+    return { data };
   }
 }

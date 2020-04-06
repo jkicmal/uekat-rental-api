@@ -34,7 +34,7 @@ class RentalService {
   }
 
   public async getCustomerRental(customer: Account, id: number, resourceQueryParams: ResourceQueryParams) {
-    const rental = await this.getOneRental(id);
+    const rental = await this.getOneRental(id, resourceQueryParams);
 
     const wasRentedByCustomer = await customer.hasRented(rental);
     if (!wasRentedByCustomer) throw new ForbiddenError('Rental was not requested by that customer');

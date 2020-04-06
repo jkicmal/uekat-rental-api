@@ -56,9 +56,9 @@ export class ProductController {
   @Authorized(AccountType.EMPLOYEE)
   @Get('/api/v1/employee/rentals')
   public async employeeGetAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
-    const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(
-      resourceQueryPathParams
-    ).applyRelations(['requestedBy']).resourceQueryParams;
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(resourceQueryPathParams)
+      .applyRelations(['requestedBy'])
+      .applyOrder().resourceQueryParams;
     const rentals = await this.rentalService.getAllRentals(resourceQueryParams);
     return { data: rentals };
   }
