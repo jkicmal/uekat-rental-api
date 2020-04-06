@@ -66,6 +66,7 @@ class RentalService {
 
     rental.status = RentalStatus.ACCEPTED;
     rental.acceptedBy = employee;
+
     return await this.rentalRepository.save(rental);
 
     // TODO: SEND EMAIL TO CUSTOMER
