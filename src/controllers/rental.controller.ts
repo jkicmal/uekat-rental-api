@@ -6,7 +6,8 @@ import {
   CurrentUser,
   Get,
   QueryParams,
-  Param
+  Param,
+  OnUndefined
 } from 'routing-controllers';
 import { Service } from 'typedi';
 
@@ -71,7 +72,37 @@ export class ProductController {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Rental>(
       resourceQueryPathParams
     ).applyRelations(['items', 'requestedBy', 'items.product', 'items.product.category']).resourceQueryParams;
-    const rentals = await this.rentalService.getOneRental(id, resourceQueryParams);
-    return { data: rentals };
+    const rental = await this.rentalService.getOneRental(id, resourceQueryParams);
+    return { data: rental };
+  }
+
+  @Authorized(AccountType.EMPLOYEE)
+  @Post('/api/v1/employee/rentals/:id/accept')
+  public async employeeAcceptRental(
+    @CurrentUser({ required: true }) employee: Account,
+    @Param('id') id: number
+  ) {
+    const rental = await this.rentalService.acceptRental(employee, id);
+    return { data: rental };
+  }
+
+  @Authorized(AccountType.EMPLOYEE)
+  @Post('/api/v1/employee/rentals/:id/reject')
+  public async employeeRejectRental(
+    @CurrentUser({ required: true }) employee: Account,
+    @Param('id') id: number
+  ) {
+    const rental = await this.rentalService.rejectRental(employee, id);
+    return { data: rental };
+  }
+
+  @Authorized(AccountType.EMPLOYEE)
+  @Post('/api/v1/employee/rentals/:id/finalize')
+  public async employeeFinalizeRental(
+    @CurrentUser({ required: true }) employee: Account,
+    @Param('id') id: number
+  ) {
+    const rental = await this.rentalService.finalizeRental(employee, id);
+    return { data: rental };
   }
 }

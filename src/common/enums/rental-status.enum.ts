@@ -1,7 +1,6 @@
 export enum RentalStatus {
   NEW = 'NEW',
   ACCEPTED = 'ACCEPTED',
-  PENDING = 'PENDING',
-  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
   FINALIZED = 'FINALIZED'
 }
