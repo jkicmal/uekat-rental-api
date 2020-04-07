@@ -4,3 +4,4 @@ export { default as ProductService } from './product.service';
 export { default as ItemService } from './item.service';
 export { default as RentalService } from './rental.service';
 export { default as StoreService } from './store.service';
+export { default as MailService } from './mail.service';

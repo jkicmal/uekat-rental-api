@@ -1,19 +1,23 @@
-import { Service } from 'typedi';
+import { Service, Inject } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 
 import { RentalFormData } from '../common/interfaces';
-import { RentalRepository, ProductRepository, ItemRepository } from '../repositories';
-import { Account, Rental } from '../entities';
+import { RentalRepository, ProductRepository, ItemRepository, AccountRepository } from '../repositories';
+import { Account } from '../entities';
 import { NotFoundError, ForbiddenError } from '../common/errors';
 import { ResourceQueryParams } from '../common/helpers';
 import { RentalStatus } from '../common/enums';
+
+import MailService from './mail.service';
 
 @Service()
 class RentalService {
   constructor(
     @InjectRepository() private rentalRepository: RentalRepository,
     @InjectRepository() private productRepository: ProductRepository,
-    @InjectRepository() private itemRepository: ItemRepository
+    @InjectRepository() private itemRepository: ItemRepository,
+    @InjectRepository() private accountRepository: AccountRepository,
+    private mailService: MailService
   ) {}
 
   public async getCustomerRentals(customer: Account) {
@@ -47,53 +51,97 @@ class RentalService {
    */
 
   public async createCustomerRental(customer: Account, rentalFormData: RentalFormData) {
+    // Get products to rent
     const rentalProducts = await this.productRepository.findProductsAvailableForRental(
       rentalFormData.productsIds
     );
 
     if (!rentalProducts.length) throw new NotFoundError('One of requested products is unavailable');
 
+    // Get items to rent out
     const rentalItems = rentalProducts.map(product => product.items[0]);
+
+    // Mark items as unavailable
     await this.itemRepository.setItemsAvailability(rentalItems, false);
 
-    return await this.rentalRepository.createAndSave(customer, rentalProducts, rentalItems, rentalFormData);
+    // Create rental
+    const rental = await this.rentalRepository.createAndSave(
+      customer,
+      rentalProducts,
+      rentalItems,
+      rentalFormData
+    );
 
-    // TODO: SEND EMAIL TO EMPLOYEE
+    // Send email to employee
+    const employeesReceivingEmails = await this.accountRepository.getEmployeesThatReceiveEmails();
+    this.mailService.sendMailToMultipleAccounts(
+      employeesReceivingEmails,
+      'Rental Created',
+      `New renal was created, check it out at localhost:3000/employee/rentals/${rental.id}`
+    );
+
+    return rental;
   }
 
   public async acceptRental(employee: Account, id: number) {
-    const rental = await this.getOneRental(id);
+    const rental = await this.getOneRental(id, { relations: ['requestedBy'] });
 
     rental.status = RentalStatus.ACCEPTED;
     rental.acceptedBy = employee;
 
-    return await this.rentalRepository.save(rental);
+    await this.rentalRepository.save(rental);
 
-    // TODO: SEND EMAIL TO CUSTOMER
+    // Send email to customer
+    if (rental.requestedBy.receiveEmails)
+      this.mailService.sendMailToAccount(
+        rental.requestedBy,
+        'Rental Accepted',
+        `Your rental was accepted! Check it out at localhost:3000/customer/rentals/${rental.id}`
+      );
+
+    return rental;
   }
 
   public async rejectRental(employee: Account, id: number) {
-    const rental = await this.getOneRental(id, { relations: ['items'] });
+    const rental = await this.getOneRental(id, { relations: ['items', 'requestedBy'] });
 
     rental.status = RentalStatus.REJECTED;
+    rental.rejectedBy = employee;
+
+    await this.itemRepository.setItemsAvailability(rental.items, true);
 
     await this.rentalRepository.save(rental);
 
-    return await this.itemRepository.setItemsAvailability(rental.items, true);
+    // Send email to customer
+    if (rental.requestedBy.receiveEmails)
+      this.mailService.sendMailToAccount(
+        rental.requestedBy,
+        'Rental Rejected',
+        `Your rental was rejected! Check it out at localhost:3000/customer/rentals/${rental.id}`
+      );
 
-    // TODO: SEND EMAIL TO CUSTOMER
+    return rental;
   }
 
   public async finalizeRental(employee: Account, id: number) {
-    const rental = await this.getOneRental(id, { relations: ['items'] });
+    const rental = await this.getOneRental(id, { relations: ['items', 'requestedBy'] });
 
     rental.status = RentalStatus.FINALIZED;
+    rental.finalizedBy = employee;
+
+    await this.itemRepository.setItemsAvailability(rental.items, true);
 
     await this.rentalRepository.save(rental);
 
-    return await this.itemRepository.setItemsAvailability(rental.items, true);
+    // Send email to customer
+    if (rental.requestedBy.receiveEmails)
+      this.mailService.sendMailToAccount(
+        rental.requestedBy,
+        'Rental Finalized',
+        `Thanks for using our services, we really apprecieate it :)`
+      );
 
-    // TODO: SEND EMAIL TO CUSTOMER
+    return rental;
   }
 }
 

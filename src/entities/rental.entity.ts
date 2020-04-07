@@ -59,6 +59,20 @@ export class Rental {
   @JoinColumn({ name: 'acceptedBy' })
   acceptedBy: Account;
 
+  @ManyToOne(
+    () => Account,
+    account => account.finalizedRentals
+  )
+  @JoinColumn({ name: 'finalizedBy' })
+  finalizedBy: Account;
+
+  @ManyToOne(
+    () => Account,
+    account => account.rejectedRentals
+  )
+  @JoinColumn({ name: 'rejectedBy' })
+  rejectedBy: Account;
+
   @ManyToMany(() => Product)
   @JoinTable()
   products: Product[];

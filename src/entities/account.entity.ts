@@ -42,6 +42,9 @@ export class Account {
   })
   email: string;
 
+  @Column({ type: 'bool', default: false })
+  receiveEmails: boolean;
+
   /**
    * NOTE:
    * Account is of type CUSTOMER by default
@@ -100,6 +103,18 @@ export class Account {
     rental => rental.requestedBy
   )
   requestedRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
+    rental => rental.finalizedBy
+  )
+  finalizedRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
+    rental => rental.rejectedBy
+  )
+  rejectedRentals: Rental[];
 
   @OneToMany(
     () => Rental,
