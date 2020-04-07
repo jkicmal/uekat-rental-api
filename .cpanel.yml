@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/pybvsar/node/rental-api
+    - /bin/cp -R * $DEPLOYPATH
