@@ -6,8 +6,7 @@ import {
   CurrentUser,
   Get,
   QueryParams,
-  Param,
-  OnUndefined
+  Param
 } from 'routing-controllers';
 import { Service } from 'typedi';
 

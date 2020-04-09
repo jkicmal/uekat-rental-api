@@ -9,8 +9,11 @@ class AccountService {
   constructor(@InjectRepository(Account) private accountRepository: AccountRepository) {}
 
   public async getAll(resourceQueryParams: ResourceQueryParams<Account>) {
-    const accounts = await this.accountRepository.find(resourceQueryParams);
-    return { data: accounts };
+    return await this.accountRepository.find(resourceQueryParams);
+  }
+
+  public async getOne(id: number, resourceQueryParams: ResourceQueryParams<Account>) {
+    return await this.accountRepository.findOne(id, resourceQueryParams);
   }
 }
 

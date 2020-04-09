@@ -1,4 +1,4 @@
-import { Get, JsonController, Authorized, QueryParams } from 'routing-controllers';
+import { Get, JsonController, Authorized, QueryParams, Param } from 'routing-controllers';
 import { Account } from '../entities';
 import { AccountType } from '../common/enums';
 import { ResourceQueryPathParams, ResourceQueryParamsBuilder } from '../common/helpers';
@@ -14,6 +14,23 @@ export class AccountsController {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Account>(resourceQueryPathParams).applyWhere()
       .resourceQueryParams;
 
-    return this.accountService.getAll(resourceQueryParams);
+    const accounts = await this.accountService.getAll(resourceQueryParams);
+
+    return { data: accounts };
+  }
+
+  @Get('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeGetOne(
+    @Param('id') id: number,
+    @QueryParams() resourceQueryPathParams: ResourceQueryPathParams
+  ) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Account>(resourceQueryPathParams)
+      .applyWhere()
+      .applyRelations(['requestedRentals']).resourceQueryParams;
+
+    const account = await this.accountService.getOne(id, resourceQueryParams);
+
+    return { data: account };
   }
 }
