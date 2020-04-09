@@ -1,8 +1,9 @@
-import { Get, JsonController, Authorized, QueryParams, Param } from 'routing-controllers';
+import { Get, JsonController, Authorized, QueryParams, Param, Put, Body } from 'routing-controllers';
 import { Account } from '../entities';
 import { AccountType } from '../common/enums';
 import { ResourceQueryPathParams, ResourceQueryParamsBuilder } from '../common/helpers';
 import AccountService from '../services/account.service';
+import { AccountEditFormData } from '../common/interfaces';
 
 @JsonController()
 export class AccountsController {
@@ -30,6 +31,14 @@ export class AccountsController {
       .applyRelations(['requestedRentals']).resourceQueryParams;
 
     const account = await this.accountService.getOne(id, resourceQueryParams);
+
+    return { data: account };
+  }
+
+  @Put('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeUpdateOne(@Param('id') id: number, @Body() accountEditFormData: AccountEditFormData) {
+    const account = await this.accountService.updateOne(id, accountEditFormData);
 
     return { data: account };
   }
