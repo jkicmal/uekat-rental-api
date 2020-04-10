@@ -68,6 +68,13 @@ export class Rental {
 
   @ManyToOne(
     () => Account,
+    account => account.cancelledRentals
+  )
+  @JoinColumn({ name: 'cancelledBy' })
+  cancelledBy: Account;
+
+  @ManyToOne(
+    () => Account,
     account => account.rejectedRentals
   )
   @JoinColumn({ name: 'rejectedBy' })

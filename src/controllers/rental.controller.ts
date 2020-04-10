@@ -104,4 +104,14 @@ export class ProductController {
     const rental = await this.rentalService.finalizeRental(employee, id);
     return { data: rental };
   }
+
+  @Authorized(AccountType.EMPLOYEE)
+  @Post('/api/v1/employee/rentals/:id/cancel')
+  public async employeeCancelRental(
+    @CurrentUser({ required: true }) employee: Account,
+    @Param('id') id: number
+  ) {
+    const rental = await this.rentalService.cancelRental(employee, id);
+    return { data: rental };
+  }
 }

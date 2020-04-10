@@ -112,6 +112,12 @@ export class Account {
 
   @OneToMany(
     () => Rental,
+    rental => rental.cancelledBy
+  )
+  cancelledRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
     rental => rental.rejectedBy
   )
   rejectedRentals: Rental[];

@@ -143,6 +143,27 @@ class RentalService {
 
     return rental;
   }
+
+  public async cancelRental(employee: Account, id: number) {
+    const rental = await this.getOneRental(id, { relations: ['items', 'requestedBy'] });
+
+    rental.status = RentalStatus.CANCELLED;
+    rental.cancelledBy = employee;
+
+    await this.itemRepository.setItemsAvailability(rental.items, true);
+
+    await this.rentalRepository.save(rental);
+
+    // Send email to customer
+    if (rental.requestedBy.receiveEmails)
+      this.mailService.sendMailToAccount(
+        rental.requestedBy,
+        'Rental Cancelled',
+        `We are sorry but your rental (#${rental.id}) has been cancelled.`
+      );
+
+    return rental;
+  }
 }
 
 export default RentalService;
