@@ -1,4 +1,4 @@
-import { Get, JsonController, Authorized, QueryParams, Param, Put, Body } from 'routing-controllers';
+import { Get, JsonController, Authorized, QueryParams, Param, Put, Body, Delete } from 'routing-controllers';
 import { Account } from '../entities';
 import { AccountType } from '../common/enums';
 import { ResourceQueryPathParams, ResourceQueryParamsBuilder } from '../common/helpers';
@@ -39,6 +39,14 @@ export class AccountsController {
   @Authorized(AccountType.EMPLOYEE)
   async employeeUpdateOne(@Param('id') id: number, @Body() accountEditFormData: AccountEditFormData) {
     const account = await this.accountService.updateOne(id, accountEditFormData);
+
+    return { data: account };
+  }
+
+  @Delete('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeDeleteOne(@Param('id') id: number) {
+    const account = await this.accountService.deleteOne(id);
 
     return { data: account };
   }

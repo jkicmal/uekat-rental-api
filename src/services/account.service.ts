@@ -14,8 +14,11 @@ class AccountService {
     return await this.accountRepository.find(resourceQueryParams);
   }
 
-  public async getOne(id: number, resourceQueryParams: ResourceQueryParams<Account>) {
-    const account = await this.accountRepository.findOne(id, resourceQueryParams);
+  public async getOne(id: number, resourceQueryParams?: ResourceQueryParams<Account>) {
+    let account: Account | undefined;
+
+    if (typeof resourceQueryParams == 'undefined') account = await this.accountRepository.findOne(id);
+    else account = await this.accountRepository.findOne(id, resourceQueryParams);
 
     if (!account) throw new NotFoundError('Account not found');
 
@@ -23,14 +26,20 @@ class AccountService {
   }
 
   public async updateOne(id: number, accountEditFormData: AccountEditFormData) {
-    const account = await this.accountRepository.findOne(id);
-
-    if (!account) throw new NotFoundError('Account not found');
+    const account = await this.getOne(id);
 
     account.type = accountEditFormData.type;
     await this.accountRepository.save(account);
 
     return account;
+  }
+
+  public async deleteOne(id: number) {
+    const account = await this.getOne(id);
+
+    await this.accountRepository.remove(account);
+
+    return { ...account, id: id };
   }
 }
 
