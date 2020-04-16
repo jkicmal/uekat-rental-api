@@ -22,9 +22,10 @@ import { AccountType } from '../common/enums';
 export class ProductController {
   constructor(private productService: ProductService) {}
 
+  // Employee
   @Authorized(AccountType.EMPLOYEE)
   @Get('/api/v1/employee/products')
-  public async getAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
+  public async employeeGetMany(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Product>(resourceQueryPathParams)
       .applyOrder()
       .applyRelations(['category'])
@@ -35,7 +36,7 @@ export class ProductController {
 
   @Authorized(AccountType.EMPLOYEE)
   @Get('/api/v1/employee/products/:id')
-  public async getOne(
+  public async employeeGetOne(
     @Param('id') id: number,
     @QueryParams() resourceQueryPathParams: ResourceQueryPathParams
   ) {
@@ -48,19 +49,19 @@ export class ProductController {
 
   @Authorized(AccountType.EMPLOYEE)
   @Post('/api/v1/employee/products')
-  public async create(@Body() productFormData: ProductFormData) {
+  public async employeeCreate(@Body() productFormData: ProductFormData) {
     return this.productService.create(productFormData);
   }
 
   @Authorized(AccountType.EMPLOYEE)
   @Put('/api/v1/employee/products/:id')
-  public async update(@Param('id') id: number, @Body() productFormData: ProductFormData) {
+  public async employeeUpdate(@Param('id') id: number, @Body() productFormData: ProductFormData) {
     return this.productService.update(id, productFormData);
   }
 
   @Authorized(AccountType.EMPLOYEE)
   @Delete('/api/v1/employee/products/:id')
-  public async delete(@Param('id') id: number) {
+  public async employeeDelete(@Param('id') id: number) {
     return this.productService.delete(id);
   }
 }
