@@ -5,7 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
-  ManyToMany
+  ManyToMany,
+  JoinTable
 } from 'typeorm';
 
 import { Item, Rental, Category } from '.';
@@ -51,5 +52,6 @@ export class Product {
   items: Item[];
 
   @ManyToMany(() => Rental)
+  @JoinTable()
   rentals: Rental[];
 }

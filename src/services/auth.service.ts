@@ -70,7 +70,9 @@ class AuthService {
     account.tokenRefreshRequired = false;
     await this.accountRepository.save(account);
 
-    return { data: { token: account.token, expiresIn: this.config.jwt.expiresIn, accountType: account.type } };
+    return {
+      data: { token: account.token, expiresIn: this.config.jwt.expiresIn, accountType: account.type }
+    };
   }
 }
 
