@@ -18,8 +18,11 @@ export class RoutingControllerUtils {
    * True - allow access to the resource
    * False - deny access to the resource
    */
-  public async authorizationChecker(action: Action, roles: string[]) {
+  public async authorizationChecker(action: Action, accountTypes: string[]) {
     const authHeader = action.request.headers['authorization'];
+
+    if (!authHeader) return false;
+
     const token = this.getTokenFromHeader(authHeader);
 
     if (!token) return false;
@@ -28,16 +31,13 @@ export class RoutingControllerUtils {
     this.jwt.verify(token, this.config.jwt.secret);
 
     // Fetch account
-    const account = await this.accountRepository.findOne({ token: token }, { relations: ['roles'] });
+    const account = await this.accountRepository.findOne({ token: token });
 
     // If account was found but token has to be refreshed
     if (account && account.tokenRefreshRequired) return false;
 
-    // If account was found and there are no roles specified - authorize successfuly
-    if (account && !roles.length) return true;
-
-    // If account was found and has specified role assigned - authorize successfulyy
-    if (account && account.roles.find(role => roles.includes(role.name))) return true;
+    // If account was found and has valid type
+    if (account && accountTypes.some(accountType => accountType === account.type)) return true;
 
     // Otherwise deny access
     return false;
@@ -52,7 +52,7 @@ export class RoutingControllerUtils {
 
     if (!token) return false;
 
-    return await this.accountRepository.findOne({ token: token }, { relations: ['roles'] });
+    return await this.accountRepository.findOne({ token: token });
   }
 
   private getTokenFromHeader(authHeader: string) {

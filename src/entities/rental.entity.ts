@@ -1,6 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn
+} from 'typeorm';
 
-import { Account } from '.';
+import { Account, Product, Item } from '.';
+import { RentalStatus } from '../common/enums';
 
 @Entity()
 export class Rental {
@@ -8,19 +19,28 @@ export class Rental {
   id: number;
 
   @Column()
-  startTime: Date;
+  startDate: Date;
 
   @Column()
-  endTime: Date;
+  endDate: Date;
 
   @Column()
-  requestedTime: Date;
+  pickupTime: Date;
 
-  @Column()
-  cancelledTime: Date;
+  @Column({ enum: RentalStatus, default: RentalStatus.NEW })
+  status: RentalStatus;
 
-  @Column()
-  status: string;
+  @Column({ type: 'float' })
+  depositTotal: number;
+
+  @Column({ type: 'float' })
+  priceTotal: number;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   /**
    * Relations
@@ -38,4 +58,33 @@ export class Rental {
   )
   @JoinColumn({ name: 'acceptedBy' })
   acceptedBy: Account;
+
+  @ManyToOne(
+    () => Account,
+    account => account.finalizedRentals
+  )
+  @JoinColumn({ name: 'finalizedBy' })
+  finalizedBy: Account;
+
+  @ManyToOne(
+    () => Account,
+    account => account.cancelledRentals
+  )
+  @JoinColumn({ name: 'cancelledBy' })
+  cancelledBy: Account;
+
+  @ManyToOne(
+    () => Account,
+    account => account.rejectedRentals
+  )
+  @JoinColumn({ name: 'rejectedBy' })
+  rejectedBy: Account;
+
+  @ManyToMany(() => Product)
+  @JoinTable()
+  products: Product[];
+
+  @ManyToMany(() => Item)
+  @JoinTable()
+  items: Item[];
 }

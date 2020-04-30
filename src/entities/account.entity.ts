@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, getConnection } from 'typeorm';
 import {
   Length,
   validate,
@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import bcrypt from 'bcrypt';
 import Container from 'typedi';
-import { Rental, Role } from '.';
+import { Rental, Item } from '.';
 import { AccountType } from '../common/enums';
 import { ConfigToken, JWTToken } from '../common/tokens';
 
@@ -41,6 +41,9 @@ export class Account {
     message: (args: ValidationArguments) => `${args.value} is not valid email`
   })
   email: string;
+
+  @Column({ type: 'bool', default: false })
+  receiveEmails: boolean;
 
   /**
    * NOTE:
@@ -81,7 +84,8 @@ export class Account {
 
   @Column()
   @MinLength(8, {
-    message: (args: ValidationArguments) => `Password should be at least ${args.constraints[0]} characters long`
+    message: (args: ValidationArguments) =>
+      `Password should be at least ${args.constraints[0]} characters long`
   })
   password: string;
 
@@ -102,16 +106,33 @@ export class Account {
 
   @OneToMany(
     () => Rental,
+    rental => rental.finalizedBy
+  )
+  finalizedRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
+    rental => rental.cancelledBy
+  )
+  cancelledRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
+    rental => rental.rejectedBy
+  )
+  rejectedRentals: Rental[];
+
+  @OneToMany(
+    () => Rental,
     rental => rental.acceptedBy
   )
   acceptedRentals: Rental[];
 
-  @ManyToMany(
-    () => Role,
-    role => role.accounts
+  @OneToMany(
+    () => Item,
+    item => item.owner
   )
-  @JoinTable()
-  roles: Role[];
+  ownedItems: Item[];
 
   /**
    * Listeners
@@ -139,5 +160,12 @@ export class Account {
     this.token = jwt.sign({ data: { accountType: this.type } }, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn
     });
+  }
+
+  async hasRented(rental: Rental) {
+    const rented = await getConnection()
+      .getRepository(Rental)
+      .findOne(rental.id, { relations: ['requestedBy'] });
+    return rented && rented.requestedBy.id === this.id;
   }
 }

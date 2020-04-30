@@ -5,7 +5,7 @@ export type Moment = typeof moment;
 
 export interface MomentInstance extends moment.MomentTimezone {}
 
-const MomentToken = new Token<Moment>();
+export const MomentToken = new Token<Moment>();
 
 // TODO: Set default timezone from config
 

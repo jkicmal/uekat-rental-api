@@ -1,14 +1,53 @@
-import { Get, JsonController } from 'routing-controllers';
-import { InjectRepository } from 'typeorm-typedi-extensions';
+import { Get, JsonController, Authorized, QueryParams, Param, Put, Body, Delete } from 'routing-controllers';
 import { Account } from '../entities';
-import { AccountRepository } from '../repositories';
+import { AccountType } from '../common/enums';
+import { ResourceQueryPathParams, ResourceQueryParamsBuilder } from '../common/helpers';
+import AccountService from '../services/account.service';
+import { AccountEditFormData } from '../common/interfaces';
 
 @JsonController()
 export class AccountsController {
-  constructor(@InjectRepository(Account) private accountRepository: AccountRepository) {}
+  constructor(private accountService: AccountService) {}
 
-  @Get('/api/v1/accounts')
-  async getAll() {
-    return this.accountRepository.find({ relations: ['roles'] });
+  @Get('/api/v1/employee/accounts')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeGetAll(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Account>(resourceQueryPathParams).applyWhere()
+      .resourceQueryParams;
+
+    const accounts = await this.accountService.getAll(resourceQueryParams);
+
+    return { data: accounts };
+  }
+
+  @Get('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeGetOne(
+    @Param('id') id: number,
+    @QueryParams() resourceQueryPathParams: ResourceQueryPathParams
+  ) {
+    const resourceQueryParams = new ResourceQueryParamsBuilder<Account>(resourceQueryPathParams)
+      .applyWhere()
+      .applyRelations(['requestedRentals']).resourceQueryParams;
+
+    const account = await this.accountService.getOne(id, resourceQueryParams);
+
+    return { data: account };
+  }
+
+  @Put('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeUpdateOne(@Param('id') id: number, @Body() accountEditFormData: AccountEditFormData) {
+    const account = await this.accountService.updateOne(id, accountEditFormData);
+
+    return { data: account };
+  }
+
+  @Delete('/api/v1/employee/accounts/:id')
+  @Authorized(AccountType.EMPLOYEE)
+  async employeeDeleteOne(@Param('id') id: number) {
+    const account = await this.accountService.deleteOne(id);
+
+    return { data: account };
   }
 }

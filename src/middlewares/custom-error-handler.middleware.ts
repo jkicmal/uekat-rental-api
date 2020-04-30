@@ -4,7 +4,7 @@ import {
   ForbiddenError as RoutingControllersForbiddenError,
   UnauthorizedError
 } from 'routing-controllers';
-import Container, { Service, Inject } from 'typedi';
+import { Service, Inject } from 'typedi';
 import { Request, Response } from 'express';
 import { ForbiddenError, UknownServerError } from '../common/errors';
 import { TokenExpiredError } from 'jsonwebtoken';
@@ -30,7 +30,7 @@ export class CustomErrorHandlerMiddleware implements ExpressErrorMiddlewareInter
 
     // Handle error response
     const errorPayload = {
-      error: error.type,
+      type: error.type,
       message: error.message,
       stack: error.stack,
       originalError: error.originalError

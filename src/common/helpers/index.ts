@@ -1,1 +1,2 @@
-export * from './class-validator.helper';
+export * from './class-validator';
+export * from './resource-query-params-builder';
