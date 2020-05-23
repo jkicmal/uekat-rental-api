@@ -42,7 +42,7 @@ export class Account {
   })
   email: string;
 
-  @Column({ type: 'bool', default: false })
+  @Column({ type: 'bool', default: true })
   receiveEmails: boolean;
 
   /**
