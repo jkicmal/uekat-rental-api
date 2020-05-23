@@ -14,4 +14,9 @@ export interface Config {
     user: string;
     pass: string;
   };
+  fontApp: {
+    homepage: string;
+    employeeRentalPath: Function;
+    customerRentalPath: Function;
+  };
 }

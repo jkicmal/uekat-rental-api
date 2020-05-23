@@ -1,25 +1,35 @@
 {
-  "name": "getcamera-api",
+  "name": "rental-api",
   "version": "1.0.0",
   "description": "API dla wypożyczalni sprzętu filmowego i fotograficznego",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/index.js"
+    "start": "ts-node src/index.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jkicmal/getcamera-api.git"
+    "url": "git+https://github.com/jkicmal/rental-api.git"
   },
   "keywords": [],
   "author": "Jakub",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jkicmal/getcamera-api/issues"
+    "url": "https://github.com/jkicmal//rental-api/issues"
   },
-  "homepage": "https://github.com/jkicmal/getcamera-api#readme",
+  "homepage": "https://github.com/jkicmal//rental-api#readme",
+  "engines": {
+    "node": "12.14.1"
+  },
   "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1"
+  },
+  "dependencies": {
+    "@types/nodemailer": "^6.4.0",
     "@types/body-parser": "^1.19.0",
     "@types/express": "^4.17.3",
     "@types/morgan": "^1.9.0",
@@ -28,20 +38,12 @@
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.21.0",
     "@typescript-eslint/parser": "^2.21.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
+    "@types/bcrypt": "^3.0.0",
+    "@types/jsonwebtoken": "^8.3.8",
+    "@types/moment-timezone": "^0.5.12",
     "rimraf": "^3.0.2",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.2",
-    "@types/bcrypt": "^3.0.0",
-    "@types/jsonwebtoken": "^8.3.8",
-    "@types/moment-timezone": "^0.5.12"
-  },
-  "dependencies": {
-    "@types/nodemailer": "^6.4.0",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "class-transformer": "^0.2.3",
@@ -58,6 +60,7 @@
     "pg": "^7.18.2",
     "reflect-metadata": "^0.1.13",
     "routing-controllers": "^0.8.1-alpha.2",
+    "tsc": "^1.20150623.0",
     "typedi": "^0.8.0",
     "typeorm": "^0.2.22",
     "typeorm-typedi-extensions": "^0.2.3",
