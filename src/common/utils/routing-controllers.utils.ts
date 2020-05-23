@@ -19,27 +19,17 @@ export class RoutingControllerUtils {
    * False - deny access to the resource
    */
   public async authorizationChecker(action: Action, accountTypes: string[]) {
-    const authHeader = action.request.headers['authorization'];
-
-    if (!authHeader) return false;
-
-    const token = this.getTokenFromHeader(authHeader);
-
-    if (!token) return false;
-
-    // Verify token
-    this.jwt.verify(token, this.config.jwt.secret);
-
-    // Fetch account
+    const authHeader = action.request.headers['authorization']; // Zapisanie wartości nagłówka do zmiennej
+    if (!authHeader) return false; // Sprawdzenie czy nagłówek istnieje
+    const token = this.getTokenFromHeader(authHeader); // Pobranie tokenu z nagłówka
+    if (!token) return false; // Sprawdzenie czy pobrany token istnieje
+    this.jwt.verify(token, this.config.jwt.secret); // Weryfikacja tokenu
+    // Pobranie użytkownika dla którego token został wcześniej wygenerowany
     const account = await this.accountRepository.findOne({ token: token });
-
-    // If account was found but token has to be refreshed
+    // Sprawdzenie czy użytkownik wymaga ponownego logowania
     if (account && account.tokenRefreshRequired) return false;
-
-    // If account was found and has valid type
+    // Sprawdzenie czy typ użytkownika pasuje do typu zdefiniowanego w kontrolerze
     if (account && accountTypes.some(accountType => accountType === account.type)) return true;
-
-    // Otherwise deny access
     return false;
   }
 

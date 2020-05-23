@@ -23,14 +23,15 @@ export class ProductController {
   constructor(private productService: ProductService) {}
 
   // Employee
-  @Authorized(AccountType.EMPLOYEE)
-  @Get('/api/v1/employee/products')
+  @Authorized(AccountType.EMPLOYEE) // Ogranicz dostęp tylko dla pracownika
+  @Get('/api/v1/employee/products') // Adres punktu końcowego
   public async employeeGetMany(@QueryParams() resourceQueryPathParams: ResourceQueryPathParams) {
     const resourceQueryParams = new ResourceQueryParamsBuilder<Product>(resourceQueryPathParams)
       .applyOrder()
       .applyRelations(['category'])
       .applyPagination().resourceQueryParams;
 
+    // Odpowiwedź API (lista wszystkich produktów)
     return this.productService.getAll(resourceQueryParams);
   }
 

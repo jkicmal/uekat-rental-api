@@ -18,6 +18,11 @@ const config: Config = {
     secure: !!process.env.SMTP_MAIL_SECURE,
     user: process.env.SMTP_MAIL_USER || '',
     pass: process.env.SMTP_MAIL_PASS || ''
+  },
+  fontApp: {
+    homepage: 'https://rental.cubiccat.pl/',
+    employeeRentalPath: (id: number) => `https://rental.cubiccat.pl/customer/rentals/${id}`,
+    customerRentalPath: (id: number) => `https://rental.cubiccat.pl/employee/rentals/${id}`
   }
 };
 

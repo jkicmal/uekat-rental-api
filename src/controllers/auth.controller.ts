@@ -27,9 +27,12 @@ export class AuthController {
     return this.authService.logout(account);
   }
 
-  @Authorized()
-  @Get('/api/v1/profile')
-  public async getProfile(@CurrentUser({ required: true }) account: Account) {
+  @Authorized() // Endpoint wymaga autoryzacji
+  @Get('/api/v1/profile') // Url endpointu i metoda HTTP
+  public async getProfile(
+    // Użytkownik, który wysłał żądanie jest wstrzykiwany jako parametr
+    @CurrentUser({ required: true }) account: Account
+  ) {
     return account;
   }
 }

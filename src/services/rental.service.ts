@@ -1,7 +1,7 @@
 import { Service, Inject } from 'typedi';
 import { InjectRepository } from 'typeorm-typedi-extensions';
 
-import { RentalFormData } from '../common/interfaces';
+import { RentalFormData, Config } from '../common/interfaces';
 import { RentalRepository, ProductRepository, ItemRepository, AccountRepository } from '../repositories';
 import { Account } from '../entities';
 import { NotFoundError, ForbiddenError } from '../common/errors';
@@ -9,6 +9,7 @@ import { ResourceQueryParams } from '../common/helpers';
 import { RentalStatus } from '../common/enums';
 
 import MailService from './mail.service';
+import { ConfigToken } from '../common/tokens';
 
 @Service()
 class RentalService {
@@ -17,6 +18,7 @@ class RentalService {
     @InjectRepository() private productRepository: ProductRepository,
     @InjectRepository() private itemRepository: ItemRepository,
     @InjectRepository() private accountRepository: AccountRepository,
+    @Inject(ConfigToken) private config: Config,
     private mailService: MailService
   ) {}
 
@@ -77,7 +79,7 @@ class RentalService {
     this.mailService.sendMailToMultipleAccounts(
       employeesReceivingEmails,
       'Rental Created',
-      `New renal was created, check it out at localhost:3000/employee/rentals/${rental.id}`
+      `New renal was created, check it out at ${this.config.fontApp.employeeRentalPath(rental.id)}`
     );
 
     return rental;
@@ -96,7 +98,7 @@ class RentalService {
       this.mailService.sendMailToAccount(
         rental.requestedBy,
         'Rental Accepted',
-        `Your rental was accepted! Check it out at localhost:3000/customer/rentals/${rental.id}`
+        `Your rental was accepted! Check it out at ${this.config.fontApp.customerRentalPath(rental.id)}`
       );
 
     return rental;
@@ -117,7 +119,7 @@ class RentalService {
       this.mailService.sendMailToAccount(
         rental.requestedBy,
         'Rental Rejected',
-        `Your rental was rejected! Check it out at localhost:3000/customer/rentals/${rental.id}`
+        `Your rental was rejected! Check it out at ${this.config.fontApp.employeeRentalPath(rental.id)}`
       );
 
     return rental;
@@ -138,7 +140,7 @@ class RentalService {
       this.mailService.sendMailToAccount(
         rental.requestedBy,
         'Rental Finalized',
-        `Thanks for using our services, we really apprecieate it :)`
+        `Thanks for using our services, we really apprecieate it.`
       );
 
     return rental;
@@ -159,7 +161,9 @@ class RentalService {
       this.mailService.sendMailToAccount(
         rental.requestedBy,
         'Rental Cancelled',
-        `We are sorry but your rental (#${rental.id}) has been cancelled.`
+        `We are sorry but your rental ${this.config.fontApp.customerRentalPath(
+          rental.id
+        )} has been cancelled.`
       );
 
     return rental;
